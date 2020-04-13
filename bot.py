@@ -1,15 +1,15 @@
-from flask import Flask
 from pprint import pprint
 import re
 import threading
+import os
 
+from flask import Flask
 from slackeventsapi import SlackEventAdapter
 from slackclient import SlackClient
 
 import requests
 import bs4 as soup
 
-FW_TICKET_RE = re.compile(r"fw#(\d+)")
 
 app = Flask(__name__)
 
@@ -36,6 +36,9 @@ def handle_message(event_data):
 
     # TODO: this is bad; we should spin up a thread pool and connect to here via a queue
     threading.Thread(target=lambda: _handle_message(event_data)).start()
+
+
+FW_TICKET_RE = re.compile(r"fw#(\d+)")
 
 
 def _handle_message(event_data):
