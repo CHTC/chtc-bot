@@ -68,6 +68,7 @@ class RegexMessageHandler:
     def handle_message(self, client, message, matches):
         raise NotImplementedError
 
+
 class TicketLinker(RegexMessageHandler):
     def __init__(self):
         self.tickets = dict()
@@ -86,8 +87,9 @@ class TicketLinker(RegexMessageHandler):
             last_ticket_cleanup = now
 
         if ticket_id in self.tickets and now < self.tickets[ticket_id] + 5:
-            return true;
-        return false;
+            return true
+        return false
+
 
 class FlightworthyTicketLinker(TicketLinker):
     regex = re.compile(r"fw#(\d+)")
@@ -108,6 +110,7 @@ class FlightworthyTicketLinker(TicketLinker):
         client.api_call(
             "chat.postMessage", channel=message["channel"], text=msg,
         )
+
 
 class RTTicketLinker(TicketLinker):
     regex = re.compile(r"rt#(\d+)")
