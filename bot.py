@@ -2,6 +2,7 @@ from pprint import pprint
 import re
 import threading
 import os
+import time
 
 from flask import Flask
 
@@ -47,8 +48,17 @@ def _handle_message(event_data):
         if len(matches) == 0:
             continue
 
+        new_matches = matches
         try:
-            handler.handle_message(SLACK_CLIENT, message, matches)
+            now = time.monotonic()
+            for match in matches:
+                if handler.check_if_recently_linked(match, now):
+                    new_matches.pop(match)
+        except Exception as e:
+            print(e)
+
+        try:
+            handler.handle_message(SLACK_CLIENT, message, new_matches)
         except Exception as e:
             print(e)
 
@@ -58,8 +68,28 @@ class RegexMessageHandler:
     def handle_message(self, client, message, matches):
         raise NotImplementedError
 
+class TicketLinker(RegexMessageHandler):
+    def __init__(self):
+        self.tickets = dict()
+        self.last_ticket_cleanup = time.monotonic()
 
-class FlightworthyTicketLinker(RegexMessageHandler):
+    def check_if_recently_linked(self, ticket_id, now):
+        # For a side-project, let's not think too hard.  Just purge our
+        # memory of old ticket IDs when we handle a new message, rather
+        # than on a timer in another thread.  Don't bother to scan the
+        # whole list on every message, though, just if it's been more
+        # than five seconds since the last clean-up.
+        if last_ticket_cleanup + 5 < now:
+            for ticket_id, deadline in self.tickets.items():
+                if deadline + 5 < now:
+                    self.tickets.pop(ticket_id)
+            last_ticket_cleanup = now
+
+        if ticket_id in self.tickets and now < self.tickets[ticket_id] + 5:
+            return true;
+        return false;
+
+class FlightworthyTicketLinker(TicketLinker):
     regex = re.compile(r"fw#(\d+)")
 
     def handle_message(self, client, message, matches):
@@ -79,8 +109,7 @@ class FlightworthyTicketLinker(RegexMessageHandler):
             "chat.postMessage", channel=message["channel"], text=msg,
         )
 
-
-class RTTicketLinker(RegexMessageHandler):
+class RTTicketLinker(TicketLinker):
     regex = re.compile(r"rt#(\d+)")
 
     def handle_message(self, client, message, matches):
