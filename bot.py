@@ -67,11 +67,12 @@ class RegexMessageHandler:
         return matches
 
 
+# TODO: we need to do this per-channel
 class TicketLinker(RegexMessageHandler):
-    def __init__(self, memory: int = 10):
-        self.memory = memory
+    def __init__(self, relink_timeout: int):
+        self.relink_timeout = relink_timeout
 
-        self.tickets = dict()
+        self.recently_linked_cache = dict()
         self.last_ticket_cleanup = time.monotonic()
 
     def filter_matches(self, matches):
@@ -80,10 +81,10 @@ class TicketLinker(RegexMessageHandler):
         return [m for m in matches if not self.recently_linked(m, now)]
 
     def recently_linked(self, ticket_id: str, now: float):
-        if ticket_id in self.tickets:
+        if ticket_id in self.recently_linked_cache:
             return True
         else:
-            self.tickets[ticket_id] = now
+            self.recently_linked_cache[ticket_id] = now
             return False
 
     def _recently_linked_cleanup(self, now: float):
@@ -94,13 +95,13 @@ class TicketLinker(RegexMessageHandler):
         whole list on every message, though, just if it's been more
         than five seconds since the last clean-up.
         """
-        if self.last_ticket_cleanup + self.memory > now:
+        if self.last_ticket_cleanup + self.relink_timeout > now:
             return
 
-        self.tickets = {
+        self.recently_linked_cache = {
             k: last_linked
-            for k, last_linked in self.tickets.items()
-            if not last_linked + self.memory < now
+            for k, last_linked in self.recently_linked_cache.items()
+            if not last_linked + self.relink_timeout < now
         }
         self.last_ticket_cleanup = now
 
@@ -142,7 +143,11 @@ def post_message(client, *args, **kwargs):
 
 
 # TODO: this makes me think we should have a config.py file where things like this list go
-REGEX_HANDLERS = [FlightworthyTicketLinker(), RTTicketLinker()]
+RELINK_TIMEOUT = 300
+REGEX_HANDLERS = [
+    FlightworthyTicketLinker(relink_timeout=RELINK_TIMEOUT),
+    RTTicketLinker(relink_timeout=RELINK_TIMEOUT),
+]
 
 
 def startup():
