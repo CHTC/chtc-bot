@@ -80,15 +80,13 @@ class TicketLinker(RegexMessageHandler):
         # than on a timer in another thread.  Don't bother to scan the
         # whole list on every message, though, just if it's been more
         # than five seconds since the last clean-up.
-        if last_ticket_cleanup + 5 < now:
+        if self.last_ticket_cleanup + 5 < now:
             for ticket_id, deadline in self.tickets.items():
                 if deadline + 5 < now:
                     self.tickets.pop(ticket_id)
-            last_ticket_cleanup = now
+            self.last_ticket_cleanup = now
 
-        if ticket_id in self.tickets and now < self.tickets[ticket_id] + 5:
-            return true
-        return false
+        return ticket_id in self.tickets and now < self.tickets[ticket_id] + 5
 
 
 class FlightworthyTicketLinker(TicketLinker):
