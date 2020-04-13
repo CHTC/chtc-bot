@@ -76,19 +76,19 @@ class TicketLinker(RegexMessageHandler):
         # than on a timer in another thread.  Don't bother to scan the
         # whole list on every message, though, just if it's been more
         # than five seconds since the last clean-up.
-        if self.last_ticket_cleanup + self.memory < now:
-            for ticket_id, last_linked in self.tickets.items():
-                print(ticket_id, last_linked)
-                if last_linked + self.memory < now:
-                    self.tickets.pop(ticket_id)
-            self.last_ticket_cleanup = now
-
+        self._recently_linked_cleanup(now)
         print(self.tickets, now)
+
         if ticket_id in self.tickets:
             return now < self.tickets[ticket_id] + self.memory
         else:
             self.tickets[ticket_id] = now
             return False
+
+    def _recently_linked_cleanup(self, now):
+        if self.last_ticket_cleanup + self.memory < now:
+            self.tickets = {k: last_linked for k, last_linked in self.tickets.items() if not last_linked + self.memory < now}
+            self.last_ticket_cleanup = now
 
 
 class FlightworthyTicketLinker(TicketLinker):
