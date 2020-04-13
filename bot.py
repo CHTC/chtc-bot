@@ -56,7 +56,7 @@ def _handle_message(event_data):
             slack_client.api_call(
                 "chat.postMessage",
                 channel=message["channel"],
-                text=f"{url} | {title} [{status}]",
+                text=f"<{url}|fw#{ticket_id}> | {title} [{status}]",
             )
             print("done")
     except Exception as e:
