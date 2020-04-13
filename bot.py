@@ -83,7 +83,11 @@ class TicketLinker(RegexMessageHandler):
                     self.tickets.pop(ticket_id)
             self.last_ticket_cleanup = now
 
-        return ticket_id in self.tickets and now < self.tickets[ticket_id] + 5
+        if ticket_id in self.tickets:
+            return now < self.tickets[ticket_id] + 5
+        else:
+            self.tickets[ticket_id] = now
+            return false
 
 
 class FlightworthyTicketLinker(TicketLinker):
