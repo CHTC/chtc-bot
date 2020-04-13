@@ -87,7 +87,7 @@ class TicketLinker(RegexMessageHandler):
             return now < self.tickets[ticket_id] + 5
         else:
             self.tickets[ticket_id] = now
-            return false
+            return False
 
 
 class FlightworthyTicketLinker(TicketLinker):

@@ -5,4 +5,5 @@ if __name__ == "__main__":
     SLACK_CLIENT.api_call(
         "chat.postMessage", channel = "G011PN92WTV", text = "I'm alive!",
     )
+    print('hi')
     app.run()
