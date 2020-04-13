@@ -64,7 +64,7 @@ class RegexMessageHandler:
 
 
 class TicketLinker(RegexMessageHandler):
-    def __init__(self, memory = 10):
+    def __init__(self, memory=10):
         self.memory = memory
 
         self.tickets = dict()
@@ -87,7 +87,11 @@ class TicketLinker(RegexMessageHandler):
 
     def _recently_linked_cleanup(self, now):
         if self.last_ticket_cleanup + self.memory < now:
-            self.tickets = {k: last_linked for k, last_linked in self.tickets.items() if not last_linked + self.memory < now}
+            self.tickets = {
+                k: last_linked
+                for k, last_linked in self.tickets.items()
+                if not last_linked + self.memory < now
+            }
             self.last_ticket_cleanup = now
 
 
@@ -107,9 +111,7 @@ class FlightworthyTicketLinker(TicketLinker):
             msgs.append(f"<{url}|fw#{ticket_id}> | {title} [{status}]")
         msg = "\n".join(msgs)
 
-        client.api_call(
-            "chat.postMessage", channel=message["channel"], text=msg,
-        )
+        client.api_call("chat.postMessage", channel=message["channel"], text=msg)
 
 
 class RTTicketLinker(TicketLinker):
@@ -122,22 +124,18 @@ class RTTicketLinker(TicketLinker):
             msgs.append(f"<{url}|rt#{ticket_id}>")
         msg = "\n".join(msgs)
 
-        client.api_call(
-            "chat.postMessage", channel=message["channel"], text=msg,
-        )
+        client.api_call("chat.postMessage", channel=message["channel"], text=msg)
 
 
 # TODO: this makes me think we should have a config.py file where things like this list go
 REGEX_HANDLERS = [FlightworthyTicketLinker(), RTTicketLinker()]
 
+
 def startup():
     # TODO: discover channel by name
-    SLACK_CLIENT.api_call(
-        "chat.postMessage", channel = "G011PN92WTV", text = "I'm alive!",
-    )
+    SLACK_CLIENT.api_call("chat.postMessage", channel="G011PN92WTV", text="I'm alive!")
     print("I sent the I'm alive message")
 
-startup()
 
 if __name__ == "__main__":
     app.run(port=3000)
