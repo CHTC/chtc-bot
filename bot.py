@@ -1,3 +1,5 @@
+from typing import List
+
 from pprint import pprint
 import re
 import threading
@@ -45,60 +47,68 @@ def _handle_message(event_data):
     for handler in REGEX_HANDLERS:
         matches = handler.regex.findall(message["text"])
 
-        now = time.monotonic()
-        matches = [m for m in matches if not handler.recently_linked(m, now)]
-
         if len(matches) == 0:
             continue
 
         try:
-            handler.handle_message(SLACK_CLIENT, message, matches)
+            handler.handle_message(
+                SLACK_CLIENT, message, handler.filter_matches(matches)
+            )
         except Exception as e:
             print(e)
 
 
 # TODO: make this an actual metaclass
 class RegexMessageHandler:
-    def handle_message(self, client, message, matches):
+    def handle_message(self, client: SlackClient, message, matches: List[str]):
         raise NotImplementedError
+
+    def filter_matches(self, matches):
+        return matches
 
 
 class TicketLinker(RegexMessageHandler):
-    def __init__(self, memory=10):
+    def __init__(self, memory: int = 10):
         self.memory = memory
 
         self.tickets = dict()
         self.last_ticket_cleanup = time.monotonic()
 
-    def recently_linked(self, ticket_id, now):
-        # For a side-project, let's not think too hard.  Just purge our
-        # memory of old ticket IDs when we handle a new message, rather
-        # than on a timer in another thread.  Don't bother to scan the
-        # whole list on every message, though, just if it's been more
-        # than five seconds since the last clean-up.
+    def filter_matches(self, matches):
+        now = time.monotonic()
         self._recently_linked_cleanup(now)
-        print(self.tickets, now)
+        return [m for m in matches if not self.recently_linked(m, now)]
 
+    def recently_linked(self, ticket_id: str, now: float):
         if ticket_id in self.tickets:
-            return now < self.tickets[ticket_id] + self.memory
+            return True
         else:
             self.tickets[ticket_id] = now
             return False
 
-    def _recently_linked_cleanup(self, now):
-        if self.last_ticket_cleanup + self.memory < now:
-            self.tickets = {
-                k: last_linked
-                for k, last_linked in self.tickets.items()
-                if not last_linked + self.memory < now
-            }
-            self.last_ticket_cleanup = now
+    def _recently_linked_cleanup(self, now: float):
+        """
+        For a side-project, let's not think too hard.  Just purge our
+        memory of old ticket IDs when we handle a new message, rather
+        than on a timer in another thread.  Don't bother to scan the
+        whole list on every message, though, just if it's been more
+        than five seconds since the last clean-up.
+        """
+        if self.last_ticket_cleanup + self.memory > now:
+            return
+
+        self.tickets = {
+            k: last_linked
+            for k, last_linked in self.tickets.items()
+            if not last_linked + self.memory < now
+        }
+        self.last_ticket_cleanup = now
 
 
 class FlightworthyTicketLinker(TicketLinker):
     regex = re.compile(r"fw#(\d+)")
 
-    def handle_message(self, client, message, matches):
+    def handle_message(self, client, message, matches: List[str]):
         msgs = []
         for ticket_id in matches:
             url = f"https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn={ticket_id}"
@@ -111,7 +121,7 @@ class FlightworthyTicketLinker(TicketLinker):
             msgs.append(f"<{url}|fw#{ticket_id}> | {title} [{status}]")
         msg = "\n".join(msgs)
 
-        client.api_call("chat.postMessage", channel=message["channel"], text=msg)
+        post_message(client, channel=message["channel"], text=msg)
 
 
 class RTTicketLinker(TicketLinker):
@@ -124,7 +134,11 @@ class RTTicketLinker(TicketLinker):
             msgs.append(f"<{url}|rt#{ticket_id}>")
         msg = "\n".join(msgs)
 
-        client.api_call("chat.postMessage", channel=message["channel"], text=msg)
+        post_message(client, channel=message["channel"], text=msg)
+
+
+def post_message(client, *args, **kwargs):
+    client.api_call("chat.postMessage", *args, **kwargs)
 
 
 # TODO: this makes me think we should have a config.py file where things like this list go
@@ -133,7 +147,7 @@ REGEX_HANDLERS = [FlightworthyTicketLinker(), RTTicketLinker()]
 
 def startup():
     # TODO: discover channel by name
-    SLACK_CLIENT.api_call("chat.postMessage", channel="G011PN92WTV", text="I'm alive!")
+    post_message(SLACK_CLIENT, channel="G011PN92WTV", text="I'm alive!")
     print("I sent the I'm alive message")
 
 
