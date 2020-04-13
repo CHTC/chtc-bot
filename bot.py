@@ -45,14 +45,11 @@ def _handle_message(event_data):
     for handler in REGEX_HANDLERS:
         matches = handler.regex.findall(message["text"])
 
+        now = time.monotonic()
+        matches = [m for m in matches if not handler.recently_linked(m, now)]
+
         if len(matches) == 0:
             continue
-
-        now = time.monotonic()
-        try:
-            matches = [m for m in matches if not handler.recently_linked(m, now)]
-        except Exception as e:
-            print(e)
 
         try:
             handler.handle_message(SLACK_CLIENT, message, matches)
@@ -67,7 +64,9 @@ class RegexMessageHandler:
 
 
 class TicketLinker(RegexMessageHandler):
-    def __init__(self):
+    def __init__(self, memory = 10):
+        self.memory = memory
+
         self.tickets = dict()
         self.last_ticket_cleanup = time.monotonic()
 
@@ -77,14 +76,16 @@ class TicketLinker(RegexMessageHandler):
         # than on a timer in another thread.  Don't bother to scan the
         # whole list on every message, though, just if it's been more
         # than five seconds since the last clean-up.
-        if self.last_ticket_cleanup + 5 < now:
-            for ticket_id, deadline in self.tickets.items():
-                if deadline + 5 < now:
+        if self.last_ticket_cleanup + self.memory < now:
+            for ticket_id, last_linked in self.tickets.items():
+                print(ticket_id, last_linked)
+                if last_linked + self.memory < now:
                     self.tickets.pop(ticket_id)
             self.last_ticket_cleanup = now
 
+        print(self.tickets, now)
         if ticket_id in self.tickets:
-            return now < self.tickets[ticket_id] + 5
+            return now < self.tickets[ticket_id] + self.memory
         else:
             self.tickets[ticket_id] = now
             return False
@@ -128,6 +129,15 @@ class RTTicketLinker(TicketLinker):
 
 # TODO: this makes me think we should have a config.py file where things like this list go
 REGEX_HANDLERS = [FlightworthyTicketLinker(), RTTicketLinker()]
+
+def startup():
+    # TODO: discover channel by name
+    SLACK_CLIENT.api_call(
+        "chat.postMessage", channel = "G011PN92WTV", text = "I'm alive!",
+    )
+    print("I sent the I'm alive message")
+
+startup()
 
 if __name__ == "__main__":
     app.run(port=3000)
