@@ -48,17 +48,14 @@ def _handle_message(event_data):
         if len(matches) == 0:
             continue
 
-        new_matches = matches
+        now = time.monotonic()
         try:
-            now = time.monotonic()
-            for match in matches:
-                if handler.check_if_recently_linked(match, now):
-                    new_matches.pop(match)
+            matches = [m for m in matches if not handler.recently_linked(m, now)]
         except Exception as e:
             print(e)
 
         try:
-            handler.handle_message(SLACK_CLIENT, message, new_matches)
+            handler.handle_message(SLACK_CLIENT, message, matches)
         except Exception as e:
             print(e)
 
@@ -74,7 +71,7 @@ class TicketLinker(RegexMessageHandler):
         self.tickets = dict()
         self.last_ticket_cleanup = time.monotonic()
 
-    def check_if_recently_linked(self, ticket_id, now):
+    def recently_linked(self, ticket_id, now):
         # For a side-project, let's not think too hard.  Just purge our
         # memory of old ticket IDs when we handle a new message, rather
         # than on a timer in another thread.  Don't bother to scan the
