@@ -46,13 +46,13 @@ def _handle_message(event_data):
         matches = handler.regex.findall(message["text"])
 
         now = time.monotonic()
-        new_matches = [m for m in matches if not handler.recently_linked(m, now)]
+        matches = [m for m in matches if not handler.recently_linked(m, now)]
 
-        if len(new_matches) == 0:
+        if len(matches) == 0:
             continue
 
         try:
-            handler.handle_message(SLACK_CLIENT, message, new_matches)
+            handler.handle_message(SLACK_CLIENT, message, matches)
         except Exception as e:
             print(e)
 
