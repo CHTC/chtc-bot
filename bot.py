@@ -28,13 +28,19 @@ slack_events_adapter = SlackEventAdapter(SLACK_SIGNING_SECRET, "/slack/events", 
 SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
 SLACK_CLIENT = SlackClient(SLACK_BOT_TOKEN)
 
+BOT_USER_ID = "U011WEDH24U"
+
 
 @slack_events_adapter.on("message")
 def handle_message_event(event_data):
     pprint(event_data)
 
+    # skip edits
+    if event_data["event"].get("subtype") == "message_changed":
+        return
+
     # don't respond to our own messages
-    if event_data["event"]["user"] == "U011WEDH24U":
+    if event_data["event"].get("user") == BOT_USER_ID:
         return
 
     # TODO: this is bad; we should spin up a thread pool and connect to here via a queue
@@ -149,10 +155,12 @@ REGEX_HANDLERS = [
     RTTicketLinker(relink_timeout=RELINK_TIMEOUT),
 ]
 
+TESTING_CHANNEL = "G011PN92WTV"
+
 
 def startup():
     # TODO: discover channel by name
-    post_message(SLACK_CLIENT, channel="G011PN92WTV", text="I'm alive!")
+    post_message(SLACK_CLIENT, channel=TESTING_CHANNEL, text="I'm alive!")
     print("I sent the I'm alive message")
 
 
