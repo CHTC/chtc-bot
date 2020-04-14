@@ -87,6 +87,7 @@ class TicketLinker(RegexMessageHandler):
         return [m for m in matches if not self.recently_linked(m, now)]
 
     def recently_linked(self, ticket_id: str, now: float):
+        ticket_id = ticket_id.lower()
         if ticket_id in self.recently_linked_cache:
             return True
         else:
@@ -125,7 +126,7 @@ class FlightworthyTicketLinker(TicketLinker):
             title = html.h2.string.split(": ")[-1]
             status = html.find("td", text="Status:").find_next("td").b.string
 
-            msgs.append(f"<{url}|fw#{ticket_id}> | {title} [{status}]")
+            msgs.append(f"<{url}|GT#{ticket_id}> | {title} [{status}]")
         msg = "\n".join(msgs)
 
         post_message(client, channel=message["channel"], text=msg)
@@ -138,7 +139,7 @@ class RTTicketLinker(TicketLinker):
         msgs = []
         for ticket_id in matches:
             url = f"https://crt.cs.wisc.edu/rt/Ticket/Display.html?id={ticket_id}"
-            msgs.append(f"<{url}|rt#{ticket_id}>")
+            msgs.append(f"<{url}|RT#{ticket_id}>")
         msg = "\n".join(msgs)
 
         post_message(client, channel=message["channel"], text=msg)
