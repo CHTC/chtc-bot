@@ -107,7 +107,7 @@ class TicketLinker(RegexMessageHandler):
 
 
 class FlightworthyTicketLinker(TicketLinker):
-    regex = re.compile(r"fw#(\d+)")
+    regex = re.compile(r"gt#(\d+)", re.I)
 
     def handle_message(self, client, message, matches: List[str]):
         msgs = []
@@ -126,7 +126,7 @@ class FlightworthyTicketLinker(TicketLinker):
 
 
 class RTTicketLinker(TicketLinker):
-    regex = re.compile(r"rt#(\d+)")
+    regex = re.compile(r"rt#(\d+)", re.I)
 
     def handle_message(self, client, message, matches):
         msgs = []
