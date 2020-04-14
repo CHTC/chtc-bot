@@ -52,7 +52,9 @@ def _handle_message(event_data):
 
         try:
             handler.handle_message(
-                SLACK_CLIENT, message, handler.filter_matches(matches)
+                SLACK_CLIENT,
+                message,
+                handler.filter_matches(matches, message["channel"]),
             )
         except Exception as e:
             print(e)
@@ -63,7 +65,7 @@ class RegexMessageHandler:
     def handle_message(self, client: SlackClient, message, matches: List[str]):
         raise NotImplementedError
 
-    def filter_matches(self, matches):
+    def filter_matches(self, matches, channel):
         return matches
 
 
@@ -75,16 +77,24 @@ class TicketLinker(RegexMessageHandler):
         self.recently_linked_cache = dict()
         self.last_ticket_cleanup = time.monotonic()
 
-    def filter_matches(self, matches):
+    def filter_matches(self, matches, channel):
         now = time.monotonic()
         self._recently_linked_cleanup(now)
-        return [m for m in matches if not self.recently_linked(m, now)]
+        return [m for m in matches if not self.recently_linked(m, channel, now)]
 
-    def recently_linked(self, ticket_id: str, now: float):
-        if ticket_id in self.recently_linked_cache:
+    def recently_linked(self, ticket_id: str, channel: str, now: float):
+        # If (when) we specify channels in the configuration, we can
+        # create these dicts at configuration time.  We presently don't
+        # clear the channels on the assumption that the list therefor is
+        # relatively static; hopefully in this case the Slack API
+        # differentiates between #channel and @direct_message.
+        if channel not in self.recently_linked_cache:
+            self.recently_linked_cache[channel] = dict()
+
+        if ticket_id in self.recently_linked_cache[channel]:
             return True
         else:
-            self.recently_linked_cache[ticket_id] = now
+            self.recently_linked_cache[channel][ticket_id] = now
             return False
 
     def _recently_linked_cleanup(self, now: float):
