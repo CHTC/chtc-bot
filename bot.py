@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, MutableMapping
 
 from pprint import pprint
 import re
@@ -46,14 +46,13 @@ def _handle_message(event_data):
 
     for handler in REGEX_HANDLERS:
         matches = handler.regex.findall(message["text"])
+        matches = handler.filter_matches(message, matches)
 
         if len(matches) == 0:
             continue
 
         try:
-            handler.handle_message(
-                SLACK_CLIENT, message, handler.filter_matches(matches)
-            )
+            handler.handle_message(SLACK_CLIENT, message, matches)
         except Exception as e:
             print(e)
 
@@ -63,28 +62,32 @@ class RegexMessageHandler:
     def handle_message(self, client: SlackClient, message, matches: List[str]):
         raise NotImplementedError
 
-    def filter_matches(self, matches):
+    def filter_matches(self, message, matches: List[str]):
         return matches
 
 
-# TODO: we need to do this per-channel
 class TicketLinker(RegexMessageHandler):
     def __init__(self, relink_timeout: int):
         self.relink_timeout = relink_timeout
 
-        self.recently_linked_cache = dict()
+        self.recently_linked_cache: MutableMapping[(str, str), float] = {}
         self.last_ticket_cleanup = time.monotonic()
 
-    def filter_matches(self, matches):
+    def filter_matches(self, message, matches: List[str]):
         now = time.monotonic()
         self._recently_linked_cleanup(now)
-        return [m for m in matches if not self.recently_linked(m, now)]
+        return [
+            match
+            for match in matches
+            if not self.recently_linked(message["channel"], match, now)
+        ]
 
-    def recently_linked(self, ticket_id: str, now: float):
-        if ticket_id in self.recently_linked_cache:
+    def recently_linked(self, channel: str, ticket_id: str, now: float):
+        key = (channel, ticket_id)
+        if key in self.recently_linked_cache:
             return True
         else:
-            self.recently_linked_cache[ticket_id] = now
+            self.recently_linked_cache[key] = now
             return False
 
     def _recently_linked_cleanup(self, now: float):
@@ -99,8 +102,8 @@ class TicketLinker(RegexMessageHandler):
             return
 
         self.recently_linked_cache = {
-            k: last_linked
-            for k, last_linked in self.recently_linked_cache.items()
+            _: last_linked
+            for _, last_linked in self.recently_linked_cache.items()
             if not last_linked + self.relink_timeout < now
         }
         self.last_ticket_cleanup = now
