@@ -121,7 +121,7 @@ class TicketLinker(RegexMessageHandler):
 
             summary = self.get_ticket_summary(url)
             if summary is not None:
-                msg += f" | {self.get_ticket_summary(url)}"
+                msg += f" | {summary}"
 
             msgs.append(msg)
 
