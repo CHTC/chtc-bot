@@ -33,8 +33,6 @@ BOT_USER_ID = "U011WEDH24U"
 
 @slack_events_adapter.on("message")
 def handle_message_event(event_data):
-    pprint(event_data)
-
     # skip edits
     if event_data["event"].get("subtype") == "message_changed":
         return
@@ -175,7 +173,6 @@ TESTING_CHANNEL = "G011PN92WTV"
 def startup():
     # TODO: discover channel by name
     post_message(SLACK_CLIENT, channel=TESTING_CHANNEL, text="I'm alive!")
-    print("I sent the I'm alive message")
 
 
 if __name__ == "__main__":
