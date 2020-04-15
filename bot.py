@@ -1,18 +1,18 @@
 from typing import List, MutableMapping
 
-from pprint import pprint
 import re
 import threading
 import os
 import time
+import functools
 
-from flask import Flask
+from flask import Flask, request
 
 from slackeventsapi import SlackEventAdapter
 from slackclient import SlackClient
 
 import requests
-import bs4 as soup
+import bs4
 
 app = Flask(__name__)
 
@@ -31,6 +31,47 @@ SLACK_CLIENT = SlackClient(SLACK_BOT_TOKEN)
 BOT_USER_ID = "U011WEDH24U"
 
 
+@app.route("/slash/knobs")
+def knobs():
+    channel = request.args.get("channel_id")
+    knobs = request.args.get("text").split(" ")
+
+    print(
+        f"Got /knobs commands in channel {channel} ({request.args.get('channel_name')} for {knobs}"
+    )
+
+    run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs))
+
+    return "", 200
+
+
+KNOBS_URL = (
+    "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
+)
+
+
+@functools.lru_cache(2 ** 6)
+def get_url(url):
+    return requests.get(url)
+
+
+def handle_knobs(client, channel, knobs):
+    response = get_url(KNOBS_URL)
+    soup = bs4.BeautifulSoup(response.text, "html.parser")
+
+    descriptions = [get_knob_description(soup, knob) for knob in knobs]
+
+    post_message(client, channel=channel, text="\n\n".join(descriptions))
+
+
+def get_knob_description(knobs_page_soup, knob):
+    header = knobs_page_soup.find("span", text=knob)
+    raw_description = header.parent.find_next("dd")
+    description = raw_description.text.replace("\n", " ")
+
+    return f"*{knob}*\n>{description}"
+
+
 @slack_events_adapter.on("message")
 def handle_message_event(event_data):
     # skip edits
@@ -42,7 +83,12 @@ def handle_message_event(event_data):
         return
 
     # TODO: this is bad; we should spin up a thread pool and connect to here via a queue
-    threading.Thread(target=lambda: _handle_message(event_data)).start()
+    run_in_thread(lambda: _handle_message(event_data))
+
+
+def run_in_thread(func):
+    """Run a zero-argument function asynchronously in a thread (use a lambda to capture local variables)."""
+    threading.Thread(target=func).start()
 
 
 def _handle_message(event_data):
@@ -140,14 +186,17 @@ class FlightworthyTicketLinker(TicketLinker):
     prefix = "GT"
 
     def get_ticket_summary(self, url: str):
-        response = requests.get(url)
-        html = soup.BeautifulSoup(response.text, "html.parser")
+        response = get_url(url)
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
 
-        title = html.h2.string.split(": ")[-1]
-        status = html.find("td", text="Status:").find_next("td").b.string
-        last_change = html.find("td", text=re.compile(r"Last\sChange:")).find_next("td").b.string
+        title = soup.h2.string.split(": ")[-1]
+        status = self.find_info_table_element(soup, "Status:")
+        last_change = self.find_info_table_element(soup, re.compile(r"Last\sChange:"))
 
         return f"{title} [*{status}* at {last_change}]"
+
+    def find_info_table_element(self, soup, element):
+        return soup.find("td", text=element).find_next("td").b.string
 
 
 class RTTicketLinker(TicketLinker):
