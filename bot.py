@@ -112,37 +112,48 @@ class TicketLinker(RegexMessageHandler):
         }
         self.last_ticket_cleanup = now
 
+    def handle_message(self, client: SlackClient, message, matches: List[str]):
+        msgs = []
+        for ticket_id in matches:
+            url = self.url.format(ticket_id)
+
+            msg = f"<{url}|{self.prefix}#{ticket_id}>"
+
+            summary = self.get_ticket_summary(url)
+            if summary is not None:
+                msg += f" | {self.get_ticket_summary(url)}"
+
+            msgs.append(msg)
+
+        post_message(client, channel=message["channel"], text="\n".join(msgs))
+
+    def get_ticket_summary(self, url: str):
+        return None
+
+
+# Message formatting: https://api.slack.com/reference/surfaces/formatting
+
 
 class FlightworthyTicketLinker(TicketLinker):
     regex = re.compile(r"gt#(\d+)", re.I)
+    url = "https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn={}"
+    prefix = "GT"
 
-    def handle_message(self, client, message, matches: List[str]):
-        msgs = []
-        for ticket_id in matches:
-            url = f"https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn={ticket_id}"
+    def get_ticket_summary(self, url: str):
+        response = requests.get(url)
+        html = soup.BeautifulSoup(response.text, "html.parser")
 
-            response = requests.get(url)
-            html = soup.BeautifulSoup(response.text, "html.parser")
-            title = html.h2.string.split(": ")[-1]
-            status = html.find("td", text="Status:").find_next("td").b.string
+        title = html.h2.string.split(": ")[-1]
+        status = html.find("td", text="Status:").find_next("td").b.string
+        last_change = html.find("td", text="Last Change:").find_next("td").b.string
 
-            msgs.append(f"<{url}|GT#{ticket_id}> | {title} [{status}]")
-        msg = "\n".join(msgs)
-
-        post_message(client, channel=message["channel"], text=msg)
+        return f"{title} [*{status}* at {last_change}]"
 
 
 class RTTicketLinker(TicketLinker):
     regex = re.compile(r"rt#(\d+)", re.I)
-
-    def handle_message(self, client, message, matches):
-        msgs = []
-        for ticket_id in matches:
-            url = f"https://crt.cs.wisc.edu/rt/Ticket/Display.html?id={ticket_id}"
-            msgs.append(f"<{url}|RT#{ticket_id}>")
-        msg = "\n".join(msgs)
-
-        post_message(client, channel=message["channel"], text=msg)
+    url = "https://crt.cs.wisc.edu/rt/Ticket/Display.html?id={}"
+    prefix = "RT"
 
 
 def post_message(client, *args, **kwargs):
