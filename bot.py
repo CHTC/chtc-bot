@@ -145,7 +145,7 @@ class FlightworthyTicketLinker(TicketLinker):
 
         title = html.h2.string.split(": ")[-1]
         status = html.find("td", text="Status:").find_next("td").b.string
-        last_change = html.find("td", text="Last&nbsp;Change:").find_next("td").b.string
+        last_change = html.find("td", text=re.compile(r"Last\sChange:")).find_next("td").b.string
 
         return f"{title} [*{status}* at {last_change}]"
 
