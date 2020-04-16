@@ -31,7 +31,7 @@ SLACK_CLIENT = SlackClient(SLACK_BOT_TOKEN)
 BOT_USER_ID = "U011WEDH24U"
 
 
-@app.route("/slash/knobs")
+@app.route("/slash/knobs", methods=["POST"])
 def knobs():
     channel = request.args.get("channel_id")
     knobs = request.args.get("text").split(" ")
