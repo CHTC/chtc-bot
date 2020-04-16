@@ -101,11 +101,3 @@ class RTTicketLinker(TicketLinker):
     regex = re.compile(r"rt#(\d+)", re.I)
     url = "https://crt.cs.wisc.edu/rt/Ticket/Display.html?id={}"
     prefix = "RT"
-
-
-# TODO: this makes me think we should have a config.py file where things like this list go
-RELINK_TIMEOUT = 300
-REGEX_HANDLERS = [
-    FlightworthyTicketLinker(relink_timeout=RELINK_TIMEOUT),
-    RTTicketLinker(relink_timeout=RELINK_TIMEOUT),
-]

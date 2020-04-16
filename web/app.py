@@ -19,7 +19,7 @@ def create_app(config):
             app.config["SLACK_SIGNING_SECRET"], "/slack/events", app
         )
         slack_events_adapter.on("message")(
-            lambda event: slack.handle_message_event(client, event)
+            lambda event: slack.handle_message_event(app, client, event)
         )
 
         app.register_blueprint(slash.slash_bp)

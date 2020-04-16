@@ -1,4 +1,5 @@
 import os
+from web import linkers
 
 
 class Config:
@@ -11,6 +12,11 @@ class Config:
 
     # The channel ID for the testing channel on the CHTC slack
     TESTING_CHANNEL = "G011PN92WTV"
+
+    REGEX_HANDLERS = [
+        linkers.FlightworthyTicketLinker(relink_timeout=300),
+        linkers.RTTicketLinker(relink_timeout=300),
+    ]
 
 
 class HerokuConfig(Config):
