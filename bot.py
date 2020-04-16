@@ -40,7 +40,7 @@ def knobs():
 
     run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs, user))
 
-    return f"Looking for knobs {', '.join(knobs)} ...", 200
+    return f"Looking for knob{plural(knobs)} {', '.join(knobs)}", 200
 
 
 KNOBS_URL = (
@@ -59,10 +59,14 @@ def handle_knobs(client, channel, knobs, user):
 
     descriptions = {knob: get_knob_description(soup, knob) for knob in knobs}
 
-    msg_lines = [f"{user} asked for information on knobs {', '.join(knobs)}"]
+    msg_lines = [
+        f"{user} asked for information on knob{plural(knobs)} {', '.join(knobs)}"
+    ]
     if any(v is None for v in descriptions.values()):
-        msg_lines.append(f"I could not find information on {', '.join(k for k, v in knobs)}. Perhaps they were misspelled, or don't exist?")
-    msg_lines.extend(v + '\n' for v in knobs.values())
+        msg_lines.append(
+            f"I could not find information on {', '.join(k for k, v in descriptions.items())}. Perhaps they were misspelled, or don't exist?"
+        )
+    msg_lines.extend(v + "\n" for v in descriptions.values())
 
     msg = "\n".join(msg_lines)
 
@@ -79,6 +83,10 @@ def get_knob_description(knobs_page_soup, knob):
     except Exception:
         # TODO: add logging
         return None
+
+
+def plural(collection):
+    return "" if len(collection) == 1 else "s"
 
 
 @slack_events_adapter.on("message")
