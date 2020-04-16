@@ -31,10 +31,11 @@ SLACK_CLIENT = SlackClient(SLACK_BOT_TOKEN)
 BOT_USER_ID = "U011WEDH24U"
 
 
+# TODO: replace this raw flask route decorator with our own abstraction... @slash('knobs')
 @app.route("/slash/knobs", methods=["POST"])
 def knobs():
     channel = request.form.get("channel_id")
-    knobs = request.form.get("text").split(" ")
+    knobs = request.form.get("text").upper().split(" ")
 
     run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs))
 
