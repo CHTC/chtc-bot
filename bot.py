@@ -40,7 +40,7 @@ def knobs():
 
     run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs, user))
 
-    return f"Looking for knob{plural(knobs)} {', '.join(knobs)}", 200
+    return f"Looking for knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}", 200
 
 
 KNOBS_URL = (
@@ -68,8 +68,10 @@ def handle_knobs(client, channel, knobs, user):
     bad = {k: v for k, v in descriptions.items() if v is None}
 
     if bad:
+        p1 = "they were" if len(bad) > 1 else "it was"
+        p2 = "don't" if len(bad) > 1 else "it doesn't"
         msg_lines.append(
-            f"I could not find information on {', '.join(bold(k) for k, v in bad.items())}. Perhaps they were misspelled, or don't exist?"
+            f"I couldn't find information on {', '.join(bold(k) for k, v in bad.items())}. Perhaps {p1} misspelled, or {p2} exist?"
         )
     msg_lines.extend(v + "\n" for v in good.values())
 
