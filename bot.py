@@ -33,14 +33,8 @@ BOT_USER_ID = "U011WEDH24U"
 
 @app.route("/slash/knobs", methods=["POST"])
 def knobs():
-    for k, v in request.form.items():
-        print(k, v)
     channel = request.form.get("channel_id")
     knobs = request.form.get("text").split(" ")
-
-    print(
-        f"Got /knobs commands in channel {channel} ({request.args.get('channel_name')} for {knobs}"
-    )
 
     run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs))
 
@@ -62,16 +56,21 @@ def handle_knobs(client, channel, knobs):
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
     descriptions = [get_knob_description(soup, knob) for knob in knobs]
+    descriptions = filter(None, descriptions)  # filter out errors
 
     post_message(client, channel=channel, text="\n\n".join(descriptions))
 
 
 def get_knob_description(knobs_page_soup, knob):
-    header = knobs_page_soup.find("span", text=knob)
-    raw_description = header.parent.find_next("dd")
-    description = raw_description.text.replace("\n", " ")
+    try:
+        header = knobs_page_soup.find("span", text=knob)
+        raw_description = header.parent.find_next("dd")
+        description = raw_description.text.replace("\n", " ")
 
-    return f"*{knob}*\n>{description}"
+        return f"*{knob}*\n>{description}"
+    except Exception:
+        # TODO: add logging
+        return None
 
 
 @slack_events_adapter.on("message")
