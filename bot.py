@@ -33,10 +33,10 @@ BOT_USER_ID = "U011WEDH24U"
 
 @app.route("/slash/knobs", methods=["POST"])
 def knobs():
-    for k, v in request.args.items():
+    for k, v in request.form.items():
         print(k, v)
-    channel = request.args.get("channel_id")
-    knobs = request.args.get("text").split(" ")
+    channel = request.form.get("channel_id")
+    knobs = request.form.get("text").split(" ")
 
     print(
         f"Got /knobs commands in channel {channel} ({request.args.get('channel_name')} for {knobs}"
