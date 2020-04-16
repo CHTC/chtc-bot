@@ -1,5 +1,5 @@
-slackclient==1.3
-slackeventsapi
-requests
-beautifulsoup4
-gunicorn
+slackclient==1.3.0
+slackeventsapi==2.1.0
+requests==2.23.0
+beautifulsoup4==4.9.0
+gunicorn==20.0.4

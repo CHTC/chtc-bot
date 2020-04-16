@@ -1,4 +1,6 @@
-from bot import app, SLACK_CLIENT
+from web.app import create_app
+
+app = create_app(config="Heroku")
 
 if __name__ == "__main__":
     app.run()

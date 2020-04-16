@@ -1,4 +1,18 @@
+import threading
 import time
+import functools
+
+import requests
+
+
+@functools.lru_cache(2 ** 6)
+def get_url(url):
+    return requests.get(url)
+
+
+def run_in_thread(func):
+    """Run a zero-argument function asynchronously in a thread (use a lambda to capture local variables)."""
+    threading.Thread(target=func).start()
 
 
 class ForgetfulDict:

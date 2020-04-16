@@ -1,2 +1,2 @@
 release: bash release-tasks.sh
-web: gunicorn wsgi:app --preload --workers=1
+web: gunicorn wsgi:app --workers=1
