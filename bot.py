@@ -36,7 +36,7 @@ BOT_USER_ID = "U011WEDH24U"
 def knobs():
     channel = request.form.get("channel_id")
     knobs = request.form.get("text").upper().split(" ")
-    user = request.form.get("user_name")
+    user = request.form.get("user_id")
 
     run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs, user))
 
@@ -60,13 +60,18 @@ def handle_knobs(client, channel, knobs, user):
     descriptions = {knob: get_knob_description(soup, knob) for knob in knobs}
 
     msg_lines = [
-        f"{user} asked for information on knob{plural(knobs)} {', '.join(knobs)}"
+        f"<@{user}> asked for information on knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}"
     ]
-    if any(v is None for v in descriptions.values()):
+
+    # TODO: this is clunky, we should make a function for this kind of grouping
+    good = {k: v for k, v in descriptions.items() if v is not None}
+    bad = {k: v for k, v in descriptions.items() if v is None}
+
+    if bad:
         msg_lines.append(
-            f"I could not find information on {', '.join(k for k, v in descriptions.items())}. Perhaps they were misspelled, or don't exist?"
+            f"I could not find information on {', '.join(bold(k) for k, v in bad.items())}. Perhaps they were misspelled, or don't exist?"
         )
-    msg_lines.extend(v + "\n" for v in descriptions.values())
+    msg_lines.extend(v + "\n" for v in good.values())
 
     msg = "\n".join(msg_lines)
 
@@ -79,7 +84,7 @@ def get_knob_description(knobs_page_soup, knob):
         raw_description = header.parent.find_next("dd")
         description = raw_description.text.replace("\n", " ")
 
-        return f"*{knob}*\n>{description}"
+        return f"{bold(knob)}\n>{description}"
     except Exception:
         # TODO: add logging
         return None
@@ -87,6 +92,10 @@ def get_knob_description(knobs_page_soup, knob):
 
 def plural(collection):
     return "" if len(collection) == 1 else "s"
+
+
+def bold(text):
+    return f"*{text}*"
 
 
 @slack_events_adapter.on("message")
