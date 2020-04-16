@@ -1,6 +1,9 @@
+from typing import Union
+
 import threading
 import time
 import functools
+import datetime
 
 import requests
 
@@ -16,65 +19,37 @@ def run_in_thread(func):
 
 
 class ForgetfulDict:
-    def __init__(self, *, memory: float):
-        self.timeout = memory
-        self.last_cleanup = time.monotonic()
-        self.cache = dict()
-        self.memory = dict()
+    def __init__(self, *, memory_time: Union[datetime.timedelta, float]):
+        if isinstance(memory_time, datetime.timedelta):
+            memory_time = memory_time.total_seconds()
+        self.memory_time = memory_time
+
+        self._last_cleanup = time.monotonic()
+
+        self._cache = dict()
+        self._memory = dict()
 
     def __getitem__(self, key):
         now = time.monotonic()
         self._cleanup(now)
-        return self.cache[key]
+        return self._cache[key]
 
     def __setitem__(self, key, value):
         now = time.monotonic()
         self._cleanup(now)
-        if key not in self.cache:
-            self.memory[key] = now
-        self.cache[key] = value
+        if key not in self._cache:
+            self._memory[key] = now
+        self._cache[key] = value
 
     def _cleanup(self, now: float):
-        if self.last_cleanup + self.timeout > now:
+        if self._last_cleanup + self.memory_time > now:
             return
 
-        self.cache = {
+        self._cache = {
             k: v
-            for k, v in self.cache.items()
-            if k in self.memory and now < self.memory[k] + self.timeout
+            for k, v in self._cache.items()
+            if k in self._memory and now < self._memory[k] + self.memory_time
         }
-        self.memory = {k: v for k, v in self.memory.items() if k in self.cache}
+        self._memory = {k: v for k, v in self._memory.items() if k in self._cache}
 
-        self.last_cleanup = now
-
-
-if __name__ == "__main__":
-    test = ForgetfulDict(memory=0.1)
-    test["foo"] = "bar"
-    try:
-        x = test["bar"]
-        print("Test 1 FAILURE")
-        exit(1)
-    except KeyError:
-        print("Test 1 OK")
-    if test["foo"] != "bar":
-        print("Test 2 FAILURE\n")
-    else:
-        print("Test 2 OK")
-
-    time.sleep(0.2)
-
-    try:
-        x = test["bar"]
-        print("Test 3 FAILURE")
-        exit(1)
-    except KeyError:
-        print("Test 3 OK")
-    try:
-        x = test["foo"]
-        print("Test 4 FAILURE")
-        exit(1)
-    except KeyError:
-        print("Test 4 OK")
-
-    exit(0)
+        self._last_cleanup = now
