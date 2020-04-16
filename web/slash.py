@@ -14,9 +14,9 @@ def knobs():
     knobs = request.form.get("text").upper().split(" ")
     user = request.form.get("user_id")
 
-    utils.run_in_thread(
-        lambda: handle_knobs(current_app.config["SLACK_CLIENT"], channel, knobs, user)
-    )
+    client = current_app.config["SLACK_CLIENT"]
+
+    utils.run_in_thread(lambda: handle_knobs(client, channel, knobs, user))
 
     return f"Looking for knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}", 200
 
