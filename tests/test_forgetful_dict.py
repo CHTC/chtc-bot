@@ -42,6 +42,15 @@ def test_it_remembers_with_short_memory():
     assert d["key"] == 5
 
 
+def test_it_doesnt_remember():
+    d = ForgetfulDict(memory_time=10)
+
+    d["key"] = 5
+
+    with pytest.raises(KeyError):
+        d["non-key"]
+
+
 def test_constructor_converts_timedeltas():
     d = ForgetfulDict(memory_time=datetime.timedelta(seconds=1))
 
