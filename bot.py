@@ -33,6 +33,8 @@ BOT_USER_ID = "U011WEDH24U"
 
 @app.route("/slash/knobs", methods=["POST"])
 def knobs():
+    for k, v in request.args.items():
+        print(k, v)
     channel = request.args.get("channel_id")
     knobs = request.args.get("text").split(" ")
 
