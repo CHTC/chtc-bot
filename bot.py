@@ -36,10 +36,11 @@ BOT_USER_ID = "U011WEDH24U"
 def knobs():
     channel = request.form.get("channel_id")
     knobs = request.form.get("text").upper().split(" ")
+    user = request.form.get("user_name")
 
-    run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs))
+    run_in_thread(lambda: handle_knobs(SLACK_CLIENT, channel, knobs, user))
 
-    return "", 200
+    return f"Looking for knobs {', '.join(knobs)} ...", 200
 
 
 KNOBS_URL = (
@@ -52,19 +53,25 @@ def get_url(url):
     return requests.get(url)
 
 
-def handle_knobs(client, channel, knobs):
+def handle_knobs(client, channel, knobs, user):
     response = get_url(KNOBS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
-    descriptions = [get_knob_description(soup, knob) for knob in knobs]
-    descriptions = filter(None, descriptions)  # filter out errors
+    descriptions = {knob: get_knob_description(soup, knob) for knob in knobs}
 
-    post_message(client, channel=channel, text="\n\n".join(descriptions))
+    msg_lines = [f"{user} asked for information on knobs {', '.join(knobs)}"]
+    if any(v is None for v in descriptions.values()):
+        msg_lines.append(f"I could not find information on {', '.join(k for k, v in knobs)}. Perhaps they were misspelled, or don't exist?")
+    msg_lines.extend(v + '\n' for v in knobs.values())
+
+    msg = "\n".join(msg_lines)
+
+    post_message(client, channel=channel, text=msg)
 
 
 def get_knob_description(knobs_page_soup, knob):
     try:
-        header = knobs_page_soup.find("span", text=knob)
+        header = knobs_page_soup.find("span", id=knob)
         raw_description = header.parent.find_next("dd")
         description = raw_description.text.replace("\n", " ")
 
