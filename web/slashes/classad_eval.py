@@ -8,7 +8,7 @@ from flask import request, current_app
 import htcondor
 import classad
 
-from .. import slack, utils
+from .. import slack, formatting, utils
 
 
 def handle_classad_eval():
@@ -27,15 +27,24 @@ def classad_eval_reply(client, channel, user, text):
     try:
         ad, exprs = parse(text)
         results = evaluate(ad, exprs)
-        msg_lines = [
-            f"<@{user}> asked me to evaluate ClassAd expressions in the context of this ad:",
-            "```",
-            *textwrap.dedent(str(ad)).strip().splitlines(),
-            "```",
-            "Expressions:",
-            *[f"`{k}` :arrow_right: `{v}`" for k, v in results.items()],
-        ]
-        msg = "\n".join(msg_lines)
+
+        if ad != classad.ClassAd():
+            msg_lines = [
+                f"<@{user}> asked me to evaluate ClassAd expressions in the context of this ad:",
+                "```",
+                *textwrap.dedent(str(ad)).strip().splitlines(),
+                "```",
+            ]
+        else:
+            msg_lines = [f"<@{user}> asked me to evaluate ClassAd expressions:"]
+
+        msg_lines.extend(
+            [
+                f"Expressions:" if len(exprs) > 1 else None,
+                *[f"`{k}` :arrow_right: `{v}`" for k, v in results.items()],
+            ]
+        )
+        msg = "\n".join(filter(None, msg_lines))
     except Exception as e:
         msg = f"Failed to parse ad or expressions: {e}"
 
