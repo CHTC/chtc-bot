@@ -13,7 +13,7 @@ def handle_jobads():
 
     client = current_app.config["SLACK_CLIENT"]
 
-    utils.run_in_thread(lambda: jobads_reply(client, channel, attrs, user))
+    utils.run_in_thread(lambda: attrs_reply(client, channel, attrs, user))
 
     return (
         f"Looking for job ad attribute{plural(attrs)} {', '.join(bold(a) for a in attrs)}",
