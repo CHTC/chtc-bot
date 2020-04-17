@@ -2,7 +2,7 @@ import os
 
 from web.events import linkers
 from web.slashes.knobs import handle_knobs
-
+from web.slashes.knobs import handle_jobads
 
 class Config:
     # Slack credentials
@@ -20,7 +20,10 @@ class Config:
         linkers.RTTicketLinker(relink_timeout=300),
     ]
 
-    SLASH_COMMANDS = {"knobs": handle_knobs}
+    SLASH_COMMANDS = {
+        "knobs": handle_knobs,
+        "jobads": handle_jobads,
+    }
 
 
 class HerokuConfig(Config):
