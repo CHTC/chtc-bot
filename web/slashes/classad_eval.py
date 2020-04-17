@@ -30,7 +30,7 @@ def classad_eval_reply(client, channel, user, text):
         msg_lines = [
             f"<@{user}> asked me to evaluate ClassAd expressions in the context of this ad:",
             "```",
-            *textwrap.dedent(str(ad).strip()).splitlines(),
+            *textwrap.dedent(str(ad)).strip().splitlines(),
             "```",
             "Expressions:",
             *[f"`{k}` :arrow_right: `{v}`" for k, v in results.items()],
