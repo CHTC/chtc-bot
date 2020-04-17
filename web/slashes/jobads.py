@@ -8,7 +8,7 @@ from . import knobs
 
 def handle_jobads():
     channel = request.form.get("channel_id")
-    attrs = request.form.get("text").upper().split(" ")
+    attrs = request.form.get("text").split(" ")
     user = request.form.get("user_id")
 
     client = current_app.config["SLACK_CLIENT"]
@@ -56,7 +56,7 @@ def get_attrs_description(soup, attr):
         # This can't be the efficient way to do this.
         spans = soup.select("dt > code.docutils.literal.notranslate > span.pre")
         for span in spans:
-            if span.text == attr:
+            if span.text.lower() == attr.lower():
                 description = span.parent.parent.find_next("dd")
                 for converter in [
                     knobs.convert_code_to_backticks,
@@ -67,7 +67,7 @@ def get_attrs_description(soup, attr):
                     converter(description)
 
                 text_description = description.text.replace("\n", " ")
-                return f"{bold(attr)}\n>{text_description}"
+                return f"{bold(span.text)}\n>{text_description}"
         return None
 
     except Exception as e:
