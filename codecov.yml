@@ -3,9 +3,8 @@ coverage:
   round: down
   precision: 0
   status:
-    project:
-      default:
-        threshold: 50%  # allow coverage to drop by up to 50% in a PR before marking it failed
-  
+    project: off
+    patch: off
+
 comment:
   layout: "diff, files"

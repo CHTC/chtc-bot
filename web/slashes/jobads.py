@@ -14,12 +14,13 @@ def handle_jobads():
 
     utils.run_in_thread(lambda: jobads_reply(client, channel, attrs, user))
 
-    return f"Looking for job ad attribute{plural(attrs)} {', '.join(bold(a) for a in attrs)}", 200
+    return (
+        f"Looking for job ad attribute{plural(attrs)} {', '.join(bold(a) for a in attrs)}",
+        200,
+    )
 
 
-ATTRS_URL = (
-    "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
-)
+ATTRS_URL = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
 
 
 def attrs_reply(client, channel, attrs, user):
