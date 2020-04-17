@@ -10,11 +10,19 @@ import classad
 
 from .. import slack, formatting, utils
 
+HTML_UNESCAPES = {
+    "&gt;": ">",
+    "&lt;": "<",
+    "&amp;": "&",
+}
+
 
 def handle_classad_eval():
     channel = request.form.get("channel_id")
     user = request.form.get("user_id")
     text = request.form.get("text")
+    for from_, to_ in HTML_UNESCAPES.items():
+        text = text.replace(from_, to_)
 
     client = current_app.config["SLACK_CLIENT"]
 
@@ -47,7 +55,7 @@ def generate_classad_eval_reply(user, text):
             "```",
             *textwrap.dedent(str(ad)).strip().splitlines(),
             "```",
-            f"Expressions:",
+            f"Expression{formatting.plural(results)}:",
         ]
     else:
         msg_lines = [f"{prefix}:"]
