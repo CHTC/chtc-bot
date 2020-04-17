@@ -4,6 +4,7 @@ from flask import request, current_app
 from .. import http, slack, utils
 from ..formatting import plural, bold
 
+from . import knobs
 
 def handle_jobads():
     channel = request.form.get("channel_id")
@@ -54,18 +55,22 @@ def get_attrs_description(soup, attr):
     try:
         # This can't be the efficient way to do this.
         spans = soup.select("dt > code.docutils.literal.notranslate > span.pre")
-        description = spans.find(string=attr)
+        for span in spans:
+            if span.text == attr:
+                description = span.parent.parent.find_next("dd")
+                for converter in [
+                    knobs.convert_code_to_backticks,
+                    knobs.convert_code_to_backticks,
+                    knobs.convert_strong_to_stars,
+                    knobs.convert_links_to_links,
+                ]:
+                    converter(description)
 
-        for converter in [
-            convert_code_to_backticks,
-            convert_code_to_backticks,
-            convert_strong_to_stars,
-            convert_links_to_links,
-        ]:
-            converter(description)
-        text_description = description.text.replace("\n", " ")
+                text_description = description.text.replace("\n", " ")
+                return f"{bold(attr)}\n>{text_description}"
+        return None
 
-        return f"{bold(attr)}\n>{text_description}"
     except Exception as e:
         # TODO: add logging
+        print(e)
         return None
