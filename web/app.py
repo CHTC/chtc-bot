@@ -15,6 +15,7 @@ def create_app(config):
         client = SlackClient(app.config["SLACK_BOT_TOKEN"])
         app.config["SLACK_CLIENT"] = client
 
+        # hook up the low-level raw event handlers; high-level config is done in config.py
         slack_events_adapter = SlackEventAdapter(
             app.config["SLACK_SIGNING_SECRET"], "/slack/events", app
         )
@@ -23,6 +24,8 @@ def create_app(config):
                 lambda event: handler(app, client, event)
             )
 
-        app.register_blueprint(slashes.slash_bp)
+        # add routes for slash commands as specified in config.py
+        for command, handler in app.config["SLASH_COMMANDS"].items():
+            app.route(f"/slash/{command}", methods=["POST"])(handler)
 
         return app

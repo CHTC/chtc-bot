@@ -3,14 +3,8 @@ from flask import request, current_app
 
 from .. import http, slack, utils
 from ..formatting import plural, bold
-from .slashes import slash_command
-
-KNOBS_URL = (
-    "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
-)
 
 
-@slash_command("knobs")
 def knobs():
     channel = request.form.get("channel_id")
     knobs = request.form.get("text").upper().split(" ")
@@ -21,6 +15,11 @@ def knobs():
     utils.run_in_thread(lambda: handle_knobs(client, channel, knobs, user))
 
     return f"Looking for knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}", 200
+
+
+KNOBS_URL = (
+    "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
+)
 
 
 def handle_knobs(client, channel, knobs, user):
