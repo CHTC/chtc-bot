@@ -6,8 +6,8 @@ from web.slashes.knobs import handle_knobs
 
 class Config:
     # Slack credentials
-    # SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
-    # SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
+    SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
+    SLACK_BOT_TOKEN = os.environ["SLACK_BOT_TOKEN"]
 
     # The user ID for this bot
     BOT_USER_ID = "U011WEDH24U"
