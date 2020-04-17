@@ -5,14 +5,14 @@ from .. import http, slack, utils
 from ..formatting import plural, bold
 
 
-def knobs():
+def handle_knobs():
     channel = request.form.get("channel_id")
     knobs = request.form.get("text").upper().split(" ")
     user = request.form.get("user_id")
 
     client = current_app.config["SLACK_CLIENT"]
 
-    utils.run_in_thread(lambda: handle_knobs(client, channel, knobs, user))
+    utils.run_in_thread(lambda: knobs_reply(client, channel, knobs, user))
 
     return f"Looking for knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}", 200
 
@@ -22,7 +22,7 @@ KNOBS_URL = (
 )
 
 
-def handle_knobs(client, channel, knobs, user):
+def knobs_reply(client, channel, knobs, user):
     response = http.cached_get_url(KNOBS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
