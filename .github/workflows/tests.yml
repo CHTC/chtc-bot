@@ -22,5 +22,8 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip
         python3 -m pip install -r requirements-dev.txt
-    - name: Test with pytest
-      run: python3 -m pytest -v -- tests/
+        python3 -m pip install codecov
+    - name: Run tests
+      run: python3 -m pytest --cov -- tests/
+    - name: Upload coverage
+      run: codecov -t ${{ secrets.CODECOV_TOKEN }}

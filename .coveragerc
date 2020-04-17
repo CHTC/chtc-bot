@@ -1,0 +1,16 @@
+[run]
+branch = True
+
+include =
+    web/*
+    tests/*
+
+[report]
+exclude_lines =
+    pragma: no cover
+    pragma: unreachable
+    def __repr__
+    def __str__
+    raise NotImplementedError
+    raise AssertionError
+    if __name__ == .__main__.:

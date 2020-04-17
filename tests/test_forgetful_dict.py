@@ -27,7 +27,7 @@ def test_it_forgets_with_short_memory():
     d = ForgetfulDict(memory_time=0.1)
 
     d["key"] = 5
-    time.sleep(0.1)
+    time.sleep(0.2)
 
     with pytest.raises(KeyError):
         d["key"]
