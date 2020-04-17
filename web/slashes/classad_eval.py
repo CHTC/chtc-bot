@@ -28,23 +28,20 @@ def classad_eval_reply(client, channel, user, text):
         ad, exprs = parse(text)
         results = evaluate(ad, exprs)
 
-        prefix = f"<@{user}> asked me to evaluate {'a' if len(exprs) == 1 else ''} ClassAd expression{formatting.plural(exprs)}"
+        prefix = f"<@{user}> asked me to evaluate {'a ' if len(exprs) == 1 else ''}ClassAd expression{formatting.plural(exprs)}"
         if len(ad) == 0:
             msg_lines = [
                 f"{prefix} in the context of this ad:",
                 "```",
                 *textwrap.dedent(str(ad)).strip().splitlines(),
                 "```",
+                f"Expressions:",
             ]
         else:
             msg_lines = [f"{prefix}:"]
 
-        msg_lines.extend(
-            [
-                f"Expressions:" if len(exprs) > 1 else None,
-                *[f"`{k}` :arrow_right: `{v}`" for k, v in results.items()],
-            ]
-        )
+        msg_lines.extend([*[f"`{k}` :arrow_right: `{v}`" for k, v in results.items()]])
+
         msg = "\n".join(filter(None, msg_lines))
     except Exception as e:
         msg = f"Failed to parse ad or expressions: {e}"
