@@ -29,7 +29,7 @@ def classad_eval_reply(client, channel, user, text):
         results = evaluate(ad, exprs)
 
         prefix = f"<@{user}> asked me to evaluate {'a' if len(exprs) == 1 else ''} ClassAd expression{formatting.plural(exprs)}"
-        if len(ad.keys()) == 0:
+        if len(ad) == 0:
             msg_lines = [
                 f"{prefix} in the context of this ad:",
                 "```",
