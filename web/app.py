@@ -1,3 +1,5 @@
+import functools
+
 from flask import Flask
 
 from slackclient import SlackClient
@@ -19,13 +21,13 @@ def create_app(config):
         slack_events_adapter = SlackEventAdapter(
             app.config["SLACK_SIGNING_SECRET"], "/slack/events", app
         )
-        for handler, args, kwargs in events.EVENT_HANDLERS:
+        for event_handler, args, kwargs in events.EVENT_HANDLERS:
             slack_events_adapter.on(*args, **kwargs)(
-                lambda event: handler(app, client, event)
+                functools.partial(event_handler, app, client)
             )
 
         # add routes for slash commands as specified in config.py
-        for command, handler in app.config["SLASH_COMMANDS"].items():
-            app.route(f"/slash/{command}", methods=["POST"])(handler)
+        for command, command_handler in app.config["SLASH_COMMANDS"].items():
+            app.route(f"/slash/{command}", methods=["POST"])(command_handler)
 
         return app

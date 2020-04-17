@@ -5,7 +5,7 @@ coverage:
   status:
     project:
       default:
-        threshold: 1%  # allow coverage to drop by up to 1% in a PR before marking it failed
+        threshold: 50%  # allow coverage to drop by up to 50% in a PR before marking it failed
   
 comment:
   layout: "diff, files"
