@@ -19,3 +19,12 @@ def test_convert_em_to_underscores():
     knobs.convert_em_to_underscores(soup)
     test_output = soup.text
     assert test_output == "_this_ _many_many_ _condor_daemon_name_"
+
+
+# My code-reuse detector is going off.
+def test_convert_code_to_backticks():
+    test_input = """<code class="docutils literal notranslate"><span class="pre">MASTER_NAME</span></code>"""
+    soup = bs4.BeautifulSoup(test_input, "html.parser")
+    knobs.convert_code_to_backticks(soup)
+    test_output = soup.text
+    assert test_output == "`MASTER_NAME`"
