@@ -52,8 +52,8 @@ def generate_classad_eval_reply(user, text):
     else:
         msg_lines = [f"{prefix}:"]
 
-    formatted_results = {str(k).replace('\n', ' ') : str(v).replace('\n', ' ') for k, v in results}
-    msg_lines.extend([*[f"`{repr(k)}` :arrow_right: `{v}`" for k, v in formatted_results.items()]])
+    formatted_results = {str(k).replace('\n', ' '): str(v).replace('\n', ' ') for k, v in results.items()}
+    msg_lines.extend([*[f"`{k}` :arrow_right: `{v}`" for k, v in formatted_results.items()]])
 
     return "\n".join(filter(None, msg_lines))
 
