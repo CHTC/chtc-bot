@@ -28,3 +28,12 @@ def test_convert_code_to_backticks():
     knobs.convert_code_to_backticks(soup)
     test_output = soup.text
     assert test_output == "`MASTER_NAME`"
+
+
+def test_convert_strong_to_stars():
+    # This could include nested tags, but we're not testing BeautfulSoup here.
+    test_input = "<strong>very powerful</strong>"
+    soup = bs4.BeautifulSoup(test_input, "html.parser")
+    knobs.convert_strong_to_stars(soup)
+    test_output = soup.text
+    assert test_output == "*very powerful*"

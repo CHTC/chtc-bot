@@ -55,6 +55,7 @@ def get_knob_description(knobs_page_soup, knob):
         description = header.parent.find_next("dd")
         convert_em_to_underscores(description)
         convert_code_to_backticks(description)
+        convert_strong_to_stars(description)
         text_description = description.text.replace("\n", " ")
 
         return f"{bold(knob)}\n>{text_description}"
@@ -74,3 +75,9 @@ def convert_code_to_backticks(description):
         span.string = f"`{span.string}`"
         span.parent.unwrap()
         span.unwrap()
+
+
+def convert_strong_to_stars(description):
+    for em in description.find_all("strong"):
+        em.string = f"*{em.string}*"
+        em.unwrap()
