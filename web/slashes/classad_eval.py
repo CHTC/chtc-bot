@@ -53,7 +53,7 @@ def generate_classad_eval_reply(user, text):
         msg_lines = [f"{prefix}:"]
 
     msg_lines.extend(
-        f"`{format_result(k)}` :arrow_right: `{format_result(k)}`"
+        f"`{format_result(k)}` :arrow_right: `{format_result(v)}`"
         for k, v in results.items()
     )
 
