@@ -3,12 +3,8 @@ coverage:
   round: down
   precision: 0
   status:
-    project:
-      default:
-        threshold: 50%
-    patch:
-      default:
-        threshold: 50%
+    project: off
+    patch: off
 
 comment:
   layout: "diff, files"
