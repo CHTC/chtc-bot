@@ -5,20 +5,17 @@ import re
 
 import bs4
 
+from .handlers import RegexMessageHandler
 from .. import http, slack
 
 
-# TODO: make this an actual metaclass
-class RegexMessageHandler:
-    def handle_message(self, client, message, matches: List[str]):
-        raise NotImplementedError
-
-    def filter_matches(self, message, matches: List[str]):
-        return matches
-
-
 class TicketLinker(RegexMessageHandler):
-    def __init__(self, relink_timeout: int):
+    def __init__(self, *, regex, url, prefix, relink_timeout: int):
+        super().__init__(regex=regex)
+
+        self.url = url
+        self.prefix = prefix
+
         self.relink_timeout = relink_timeout
 
         self.recently_linked_cache: MutableMapping[(str, str), float] = {}
@@ -59,7 +56,7 @@ class TicketLinker(RegexMessageHandler):
         }
         self.last_ticket_cleanup = now
 
-    def handle_message(self, client, message, matches: List[str]):
+    def handle_message(self, app, client, message, matches: List[str]):
         msgs = []
         for ticket_id in matches:
             url = self.url.format(ticket_id)
@@ -79,9 +76,13 @@ class TicketLinker(RegexMessageHandler):
 
 
 class FlightworthyTicketLinker(TicketLinker):
-    regex = re.compile(r"gt#(\d+)", re.I)
-    url = "https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn={}"
-    prefix = "GT"
+    def __init__(self, *, relink_timeout):
+        super().__init__(
+            relink_timeout=relink_timeout,
+            regex=re.compile(r"gt#(\d+)", re.I),
+            url="https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn={}",
+            prefix="GT",
+        )
 
     def get_ticket_summary(self, url: str):
         response = http.cached_get_url(url)
@@ -98,6 +99,10 @@ class FlightworthyTicketLinker(TicketLinker):
 
 
 class RTTicketLinker(TicketLinker):
-    regex = re.compile(r"rt#(\d+)", re.I)
-    url = "https://crt.cs.wisc.edu/rt/Ticket/Display.html?id={}"
-    prefix = "RT"
+    def __init__(self, *, relink_timeout):
+        super().__init__(
+            relink_timeout=relink_timeout,
+            regex=re.compile(r"rt#(\d+)", re.I),
+            url="https://crt.cs.wisc.edu/rt/Ticket/Display.html?id={}",
+            prefix="RT",
+        )

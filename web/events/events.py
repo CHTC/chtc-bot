@@ -28,14 +28,9 @@ def handle_message_event(app, client, event_data):
 def _handle_message(app, client, event_data):
     message = event_data["event"]
 
-    for handler in app.config["REGEX_HANDLERS"]:
-        matches = handler.regex.findall(message["text"])
-        matches = handler.filter_matches(message, matches)
-
-        if len(matches) == 0:
-            continue
-
+    for handler in app.config["MESSAGE_HANDLERS"]:
         try:
-            handler.handle_message(client, message, matches)
+            handler.handle(app, client, message)
         except Exception as e:
-            print(e)
+            # TODO: logging
+            pass

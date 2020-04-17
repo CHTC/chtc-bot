@@ -14,7 +14,7 @@ class Config:
     # The channel ID for the testing channel on the CHTC slack
     TESTING_CHANNEL = "G011PN92WTV"
 
-    REGEX_HANDLERS = [
+    MESSAGE_HANDLERS = [
         linkers.FlightworthyTicketLinker(relink_timeout=300),
         linkers.RTTicketLinker(relink_timeout=300),
     ]
