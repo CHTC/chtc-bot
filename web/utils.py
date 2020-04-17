@@ -2,15 +2,7 @@ from typing import Union
 
 import threading
 import time
-import functools
 import datetime
-
-import requests
-
-
-@functools.lru_cache(2 ** 6)
-def get_url(url):
-    return requests.get(url)
 
 
 def run_in_thread(func):

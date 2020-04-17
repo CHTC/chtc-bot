@@ -5,7 +5,7 @@ import re
 
 import bs4
 
-from . import utils, slack
+from .. import http, slack
 
 
 # TODO: make this an actual metaclass
@@ -84,7 +84,7 @@ class FlightworthyTicketLinker(TicketLinker):
     prefix = "GT"
 
     def get_ticket_summary(self, url: str):
-        response = utils.get_url(url)
+        response = http.cached_get_url(url)
         soup = bs4.BeautifulSoup(response.text, "html.parser")
 
         title = soup.h2.string.split(": ")[-1]

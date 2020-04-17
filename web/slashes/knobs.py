@@ -1,14 +1,16 @@
-from flask import Blueprint, current_app, request
-
 import bs4
+from flask import request, current_app
 
-from .formatting import plural, bold
-from . import slack, utils
+from .. import http, slack, utils
+from ..formatting import plural, bold
+from .slashes import slash_command
 
-slash_bp = Blueprint("slash", __name__)
+KNOBS_URL = (
+    "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
+)
 
 
-@slash_bp.route("/slash/knobs", methods=["POST"])
+@slash_command("knobs")
 def knobs():
     channel = request.form.get("channel_id")
     knobs = request.form.get("text").upper().split(" ")
@@ -21,13 +23,8 @@ def knobs():
     return f"Looking for knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}", 200
 
 
-KNOBS_URL = (
-    "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
-)
-
-
 def handle_knobs(client, channel, knobs, user):
-    response = utils.get_url(KNOBS_URL)
+    response = http.cached_get_url(KNOBS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
     descriptions = {knob: get_knob_description(soup, knob) for knob in knobs}
