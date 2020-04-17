@@ -52,13 +52,19 @@ def generate_classad_eval_reply(user, text):
     else:
         msg_lines = [f"{prefix}:"]
 
-    formatted_results = {str(k).replace('\n', ' '): str(v).replace('\n', ' ') for k, v in results.items()}
-    msg_lines.extend([*[f"`{k}` :arrow_right: `{v}`" for k, v in formatted_results.items()]])
+    msg_lines.extend(
+        f"`{format_result(k)}` :arrow_right: `{format_result(k)}`"
+        for k, v in results.items()
+    )
 
     return "\n".join(filter(None, msg_lines))
 
 
 RE_PARTS = re.compile(r"'(.*?)'")
+
+
+def format_result(x):
+    return " ".join(str(x).splitlines())
 
 
 def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
