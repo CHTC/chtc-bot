@@ -1,6 +1,7 @@
 from typing import Tuple, List
 
 import re
+import textwrap
 
 from flask import request, current_app
 
@@ -26,9 +27,9 @@ def classad_eval_reply(client, channel, user, text):
     ad, exprs = parse(text)
     results = evaluate(ad, exprs)
     msg_lines = [
-        "<@user> asked me to evaluate ClassAd expressions in the context of this ad:",
+        f"<@{user}> asked me to evaluate ClassAd expressions in the context of this ad:",
         "```",
-        *str(ad).splitlines(),
+        *textwrap.dedent(str(ad).strip()).splitlines(),
         "```",
         "Expressions:",
         *[f"`{k}` :arrow_right: `{v}`" for k, v in results.items()],
