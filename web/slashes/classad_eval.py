@@ -64,7 +64,7 @@ RE_PARTS = re.compile(r"'(.*?)'")
 
 
 def format_result(x):
-    return " ".join(str(x).splitlines())
+    return " ".join(x.strip() for x in str(x).splitlines())
 
 
 def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
