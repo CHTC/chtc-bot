@@ -6,6 +6,7 @@ from ..formatting import plural, bold
 
 from . import knobs
 
+
 def handle_jobads():
     channel = request.form.get("channel_id")
     attrs = request.form.get("text").split(" ")
