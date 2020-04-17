@@ -56,6 +56,7 @@ def get_knob_description(knobs_page_soup, knob):
         convert_em_to_underscores(description)
         convert_code_to_backticks(description)
         convert_strong_to_stars(description)
+        convert_links_to_links(description)
         text_description = description.text.replace("\n", " ")
 
         return f"{bold(knob)}\n>{text_description}"
@@ -77,7 +78,17 @@ def convert_code_to_backticks(description):
         span.unwrap()
 
 
+# My code-reuse detector is going off.
 def convert_strong_to_stars(description):
     for em in description.find_all("strong"):
         em.string = f"*{em.string}*"
         em.unwrap()
+
+
+def convert_links_to_links(description):
+    for span in description.select("a.reference.internal > span.std.std-ref"):
+        href = span.parent.get("href")
+        url = f"{KNOBS_URL}{href}"
+        span.string = f"<{url}|{span.string}>"
+        span.parent.unwrap()
+        span.unwrap()
