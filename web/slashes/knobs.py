@@ -53,10 +53,13 @@ def get_knob_description(knobs_page_soup, knob):
     try:
         header = knobs_page_soup.find("span", id=knob)
         description = header.parent.find_next("dd")
-        convert_em_to_underscores(description)
-        convert_code_to_backticks(description)
-        convert_strong_to_stars(description)
-        convert_links_to_links(description)
+        for converter in [
+            convert_code_to_backticks,
+            convert_code_to_backticks,
+            convert_strong_to_stars,
+            convert_links_to_links,
+        ]:
+            converter(description)
         text_description = description.text.replace("\n", " ")
 
         return f"{bold(knob)}\n>{text_description}"
