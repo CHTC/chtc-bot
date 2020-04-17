@@ -53,6 +53,9 @@ def get_knob_description(knobs_page_soup, knob):
     try:
         header = knobs_page_soup.find("span", id=knob)
         raw_description = header.parent.find_next("dd")
+        for em in raw_description.find_all("em"):
+            em.string = f"_{em.string}_"
+            em.unwrap()
         description = raw_description.text.replace("\n", " ")
 
         return f"{bold(knob)}\n>{description}"
