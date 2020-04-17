@@ -53,7 +53,12 @@ def get_knob_description(knobs_page_soup, knob):
     try:
         header = knobs_page_soup.find("span", id=knob)
         description = header.parent.find_next("dd")
-        for converter in [convert_code_to_backticks, convert_code_to_backticks]:
+        for converter in [
+            convert_code_to_backticks,
+            convert_code_to_backticks,
+            convert_strong_to_stars,
+            convert_links_to_links,
+        ]:
             converter(description)
         text_description = description.text.replace("\n", " ")
 
@@ -72,5 +77,21 @@ def convert_em_to_underscores(description):
 def convert_code_to_backticks(description):
     for span in description.select("code.docutils.literal.notranslate > span.pre"):
         span.string = f"`{span.string}`"
+        span.parent.unwrap()
+        span.unwrap()
+
+
+# My code-reuse detector is going off.
+def convert_strong_to_stars(description):
+    for em in description.find_all("strong"):
+        em.string = f"*{em.string}*"
+        em.unwrap()
+
+
+def convert_links_to_links(description):
+    for span in description.select("a.reference.internal > span.std.std-ref"):
+        href = span.parent.get("href")
+        url = f"{KNOBS_URL}{href}"
+        span.string = f"<{url}|{span.string}>"
         span.parent.unwrap()
         span.unwrap()
