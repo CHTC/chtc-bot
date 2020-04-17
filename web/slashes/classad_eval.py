@@ -28,15 +28,16 @@ def classad_eval_reply(client, channel, user, text):
         ad, exprs = parse(text)
         results = evaluate(ad, exprs)
 
+        prefix = f"<@{user}> asked me to evaluate {'a' if len(exprs) == 1 else ''} ClassAd expression{formatting.plural(exprs)}"
         if ad != classad.ClassAd():
             msg_lines = [
-                f"<@{user}> asked me to evaluate ClassAd expressions in the context of this ad:",
+                f"{prefix} in the context of this ad:",
                 "```",
                 *textwrap.dedent(str(ad)).strip().splitlines(),
                 "```",
             ]
         else:
-            msg_lines = [f"<@{user}> asked me to evaluate ClassAd expressions:"]
+            msg_lines = [f"{prefix}:"]
 
         msg_lines.extend(
             [
