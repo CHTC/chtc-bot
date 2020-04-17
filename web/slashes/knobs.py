@@ -52,10 +52,17 @@ def knobs_reply(client, channel, knobs, user):
 def get_knob_description(knobs_page_soup, knob):
     try:
         header = knobs_page_soup.find("span", id=knob)
-        raw_description = header.parent.find_next("dd")
-        description = raw_description.text.replace("\n", " ")
+        description = header.parent.find_next("dd")
+        convert_em_to_underscores(description)
+        text_description = description.text.replace("\n", " ")
 
-        return f"{bold(knob)}\n>{description}"
-    except Exception:
+        return f"{bold(knob)}\n>{text_description}"
+    except Exception as e:
         # TODO: add logging
         return None
+
+
+def convert_em_to_underscores(description):
+    for em in description.find_all("em"):
+        em.string = f"_{em.string}_"
+        em.unwrap()
