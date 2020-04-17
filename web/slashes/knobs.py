@@ -54,6 +54,7 @@ def get_knob_description(knobs_page_soup, knob):
         header = knobs_page_soup.find("span", id=knob)
         description = header.parent.find_next("dd")
         convert_em_to_underscores(description)
+        convert_code_to_backticks(description)
         text_description = description.text.replace("\n", " ")
 
         return f"{bold(knob)}\n>{text_description}"
@@ -66,3 +67,10 @@ def convert_em_to_underscores(description):
     for em in description.find_all("em"):
         em.string = f"_{em.string}_"
         em.unwrap()
+
+
+def convert_code_to_backticks(description):
+    for span in description.select("code.docutils.literal.notranslate > span.pre"):
+        span.string = f"`{span.string}`"
+        span.parent.unwrap()
+        span.unwrap()
