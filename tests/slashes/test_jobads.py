@@ -7,8 +7,11 @@ from web.slashes import jobads
 
 def test_get_attrs_description_returns_none_if_it_fails_to_find_the_knob():
     assert (
-        jobads.get_attrs_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
+        jobads.get_attrs_description(
+            bs4.BeautifulSoup("", features="html.parser"), "foo"
+        )
         is None
     )
+
 
 # No need to test the formatters again.
