@@ -2,6 +2,7 @@ import os
 
 from web.events import linkers
 from web.slashes.knobs import handle_knobs
+from web.slashes.classad_eval import handle_classad_eval
 
 
 class Config:
@@ -20,7 +21,7 @@ class Config:
         linkers.RTTicketLinker(relink_timeout=300),
     ]
 
-    SLASH_COMMANDS = {"knobs": handle_knobs}
+    SLASH_COMMANDS = {"knobs": handle_knobs, "classad_eval": handle_classad_eval}
 
 
 class HerokuConfig(Config):
