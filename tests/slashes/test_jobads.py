@@ -72,14 +72,14 @@ ATTRS_SOUP = bs4.BeautifulSoup(ATTRS_HTML, "html.parser")
         ("NOPE", None),
     ],
 )
-def test_get_knob_description(knob, expected):
+def test_get_attrs_description(knob, expected):
     # clean up the triple-quoted string
     expected = textwrap.dedent(expected).strip() if expected is not None else expected
 
     assert jobads.get_attrs_description(ATTRS_SOUP, knob) == expected
 
 
-def test_handle_knobs_end_to_end(mocker, client):
+def test_handle_jobads_end_to_end(mocker, client):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = ATTRS_HTML
 
