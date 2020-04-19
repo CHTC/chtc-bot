@@ -6,7 +6,7 @@ import re
 import bs4
 
 from .handlers import RegexMessageHandler
-from .. import http, slack
+from .. import http, slack, formatting
 
 
 class TicketLinker(RegexMessageHandler):
@@ -66,7 +66,7 @@ class TicketLinker(RegexMessageHandler):
         for ticket_id in matches:
             url = self.url.format(ticket_id)
 
-            msg = f"<{url}|{self.prefix}#{ticket_id}>"
+            msg = formatting.link(url, f"{self.prefix}#{ticket_id}")
 
             summary = self.get_ticket_summary(url)
             if summary is not None:
@@ -97,7 +97,7 @@ class FlightworthyTicketLinker(TicketLinker):
         status = self.find_info_table_element(soup, "Status:")
         last_change = self.find_info_table_element(soup, re.compile(r"Last\sChange:"))
 
-        return f"{title} [*{status}* at {last_change}]"
+        return f"{title} [{formatting.bold(status)} at {last_change}]"
 
     def find_info_table_element(self, soup, element):
         return soup.find("td", text=element).find_next("td").b.string
