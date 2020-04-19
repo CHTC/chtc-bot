@@ -4,6 +4,7 @@ from flask import request, current_app
 from .. import http, slack, utils
 from ..formatting import plural, bold
 
+# Really?  I can't just use the full module name?
 from . import utils as su
 
 
@@ -56,10 +57,10 @@ def get_knob_description(knobs_page_soup, knob):
         header = knobs_page_soup.find("span", id=knob)
         description = header.parent.find_next("dd")
         for converter in [
-            su.convert_code_to_backticks,
+            su.convert_em_to_underscores,
             su.convert_code_to_backticks,
             su.convert_strong_to_stars,
-            su.convert_links_to_links,
+            convert_links_to_links,
         ]:
             converter(description)
         text_description = description.text.replace("\n", " ")
@@ -67,6 +68,7 @@ def get_knob_description(knobs_page_soup, knob):
         return f"{bold(knob)}\n>{text_description}"
     except Exception as e:
         # TODO: add logging
+        print(e)
         return None
 
 

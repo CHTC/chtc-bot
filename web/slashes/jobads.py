@@ -5,6 +5,7 @@ import os.path
 
 from .. import http, slack, utils
 from ..formatting import plural, bold
+
 # Really?  I can't just use the full module name?
 from . import utils as su
 
@@ -62,7 +63,7 @@ def get_attrs_description(soup, attr):
             if span.text.lower() == attr.lower():
                 description = span.parent.parent.find_next("dd")
                 for converter in [
-                    su.convert_code_to_backticks,
+                    su.convert_em_to_underscores,
                     su.convert_code_to_backticks,
                     su.convert_strong_to_stars,
                     convert_links_to_links,
@@ -75,7 +76,6 @@ def get_attrs_description(soup, attr):
 
     except Exception as e:
         # TODO: add logging
-        print(e)
         return None
 
 
