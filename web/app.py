@@ -1,32 +1,38 @@
 import functools
+from pathlib import Path
 
 from flask import Flask
 
-from slackclient import SlackClient
 from slackeventsapi import SlackEventAdapter
 
-from . import slashes, events
+from . import events
+from .executor import executor
 
 
 def create_app(config):
-    app = Flask(__name__, instance_relative_config=True)
+    app = Flask("web")
 
-    app.config.from_object(f"config.{config.lower().capitalize()}Config")
+    app.config.from_pyfile(
+        (Path(__file__).parent.parent / "config" / config.lower()).with_suffix(".py")
+    )
 
     with app.app_context():
-        client = SlackClient(app.config["SLACK_BOT_TOKEN"])
-        app.config["SLACK_CLIENT"] = client
+        executor.init_app(app)
 
-        # hook up the low-level raw event handlers; high-level config is done in config.py
-        slack_events_adapter = SlackEventAdapter(
-            app.config["SLACK_SIGNING_SECRET"], "/slack/events", app
-        )
-        for event_handler, args, kwargs in events.EVENT_HANDLERS:
-            slack_events_adapter.on(*args, **kwargs)(
-                functools.partial(event_handler, app, client)
+        # hook up the low-level raw event handlers; high-level config is done in base.py
+        if app.config.get("SLACK_SIGNING_SECRET") is not None:
+            # connect the events adapter to the flask app
+            slack_events_adapter = SlackEventAdapter(
+                app.config["SLACK_SIGNING_SECRET"], "/slack/events", app
             )
 
-        # add routes for slash commands as specified in config.py
+            # wire up individual event handlers
+            for event_handler, args, kwargs in events.EVENT_HANDLERS:
+                slack_events_adapter.on(*args, **kwargs)(
+                    functools.partial(event_handler, config)
+                )
+
+        # add routes for slash commands as specified in base.py
         for command, command_handler in app.config["SLASH_COMMANDS"].items():
             app.route(f"/slash/{command}", methods=["POST"])(command_handler)
 

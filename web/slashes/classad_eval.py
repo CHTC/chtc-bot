@@ -3,49 +3,46 @@ from typing import Tuple, List
 import re
 import textwrap
 
-from flask import request, current_app
+from flask import current_app, request
 
 import htcondor
 import classad
 
-from .. import slack, formatting, utils
-
-HTML_UNESCAPES = {
-    "&gt;": ">",
-    "&lt;": "<",
-    "&amp;": "&",
-}
+from ..executor import executor
+from .. import slack, formatting, html
 
 
 def handle_classad_eval():
     channel = request.form.get("channel_id")
     user = request.form.get("user_id")
-    text = request.form.get("text")
-    for from_, to_ in HTML_UNESCAPES.items():
-        text = text.replace(from_, to_)
+    text = html.unescape(request.form.get("text"))
 
-    client = current_app.config["SLACK_CLIENT"]
-
-    utils.run_in_thread(lambda: classad_eval_reply(client, channel, user, text))
+    executor.submit(classad_eval_reply, channel, user, text)
 
     return f":thinking_face: :newspaper:", 200
 
 
-def classad_eval_reply(client, channel, user, text):
+def classad_eval_reply(channel, user, text):
     msg = generate_classad_eval_reply(user, text)
 
-    slack.post_message(client, channel=channel, text=msg)
+    slack.post_message(channel=channel, text=msg)
 
 
 def generate_classad_eval_reply(user, text):
     try:
         ad, exprs = parse(text)
     except Exception as e:
+        current_app.logger.exception(
+            f"Failed to parse ad or expressions (raw: {text}): {e}"
+        )
         return f"Failed to parse ad or expressions: {e}"
 
     try:
         results = evaluate(ad, exprs)
     except Exception as e:
+        current_app.logger.exception(
+            f"Failed to evaluate an expression (ad: {repr(ad)}, expressions: {[exprs]}): {e}"
+        )
         return f"Failed to evaluate an expression: {e}"
 
     prefix = f"<@{user}> asked me to evaluate {'a ' if len(exprs) == 1 else ''}ClassAd expression{formatting.plural(exprs)}"

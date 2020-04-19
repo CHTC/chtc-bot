@@ -1,4 +1,6 @@
-from .. import utils
+from flask import current_app
+
+from ..executor import executor
 
 EVENT_HANDLERS = []
 
@@ -12,25 +14,24 @@ def event_handler(*args, **kwargs):
 
 
 @event_handler("message")
-def handle_message_event(app, client, event_data):
+def handle_message_event(event_data):
     # skip edits
     if event_data["event"].get("subtype") == "message_changed":
         return
 
     # don't respond to our own messages
-    if event_data["event"].get("user") == app.config["BOT_USER_ID"]:
+    if event_data["event"].get("user") == current_app.config["BOT_USER_ID"]:
         return
 
-    # TODO: this is bad; we should spin up a thread pool and connect to here via a queue
-    utils.run_in_thread(lambda: _handle_message(app, client, event_data))
+    executor.submit(_handle_message, event_data)
 
 
-def _handle_message(app, client, event_data):
+def _handle_message(event_data):
     message = event_data["event"]
 
-    for handler in app.config["MESSAGE_HANDLERS"]:
+    for handler in current_app.config["MESSAGE_HANDLERS"]:
         try:
-            handler.handle(app, client, message)
+            handler.handle(current_app.config, message)
         except Exception as e:
-            # TODO: logging
+            current_app.logger.exception(f"Uncaught exception in {handler}: {e}")
             pass

@@ -1,23 +1,21 @@
 import bs4
-from flask import request, current_app
+from flask import current_app, request
 
-from .. import http, slack, utils
-from ..formatting import plural, bold
-
-# Really?  I can't just use the full module name?
-from . import utils as su
+from ..executor import executor
+from .. import http, slack, formatting, html
 
 
 def handle_knobs():
     channel = request.form.get("channel_id")
-    knobs = request.form.get("text").upper().split(" ")
+    knobs = html.unescape(request.form.get("text")).upper().split(" ")
     user = request.form.get("user_id")
 
-    client = current_app.config["SLACK_CLIENT"]
+    executor.submit(knobs_reply, channel, knobs, user)
 
-    utils.run_in_thread(lambda: knobs_reply(client, channel, knobs, user))
-
-    return f"Looking for knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}", 200
+    return (
+        f"Looking for knob{formatting.plural(knobs)} {', '.join(formatting.bold(k) for k in knobs)}",
+        200,
+    )
 
 
 KNOBS_URL = (
@@ -25,14 +23,14 @@ KNOBS_URL = (
 )
 
 
-def knobs_reply(client, channel, knobs, user):
+def knobs_reply(channel, knobs, user):
     response = http.cached_get_url(KNOBS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
     descriptions = {knob: get_knob_description(soup, knob) for knob in knobs}
 
     msg_lines = [
-        f"<@{user}> asked for information on knob{plural(knobs)} {', '.join(bold(k) for k in knobs)}"
+        f"<@{user}> asked for information on knob{formatting.plural(knobs)} {', '.join(formatting.bold(k) for k in knobs)}"
     ]
 
     # TODO: this is clunky, we should make a function for this kind of grouping
@@ -43,13 +41,13 @@ def knobs_reply(client, channel, knobs, user):
         p1 = "they were" if len(bad) > 1 else "it was"
         p2 = "don't" if len(bad) > 1 else "it doesn't"
         msg_lines.append(
-            f"I couldn't find information on {', '.join(bold(k) for k, v in bad.items())}. Perhaps {p1} misspelled, or {p2} exist?"
+            f"I couldn't find information on {', '.join(formatting.bold(k) for k, v in bad.items())}. Perhaps {p1} misspelled, or {p2} exist?"
         )
     msg_lines.extend(v + "\n" for v in good.values())
 
     msg = "\n".join(msg_lines)
 
-    slack.post_message(client, channel=channel, text=msg)
+    slack.post_message(channel=channel, text=msg)
 
 
 def get_knob_description(knobs_page_soup, knob):
@@ -57,25 +55,17 @@ def get_knob_description(knobs_page_soup, knob):
         header = knobs_page_soup.find("span", id=knob)
         description = header.parent.find_next("dd")
         for converter in [
-            su.convert_em_to_underscores,
-            su.convert_code_to_backticks,
-            su.convert_strong_to_stars,
-            convert_links_to_links,
+            formatting.inplace_convert_em_to_underscores,
+            formatting.inplace_convert_code_to_backticks,
+            formatting.inplace_convert_strong_to_stars,
+            lambda soup: formatting.inplace_convert_internal_links_to_links(
+                soup, KNOBS_URL, "std.std-ref"
+            ),
         ]:
             converter(description)
-        text_description = description.text.replace("\n", " ")
+        text_description = formatting.compress_whitespace(description.text)
 
-        return f"{bold(knob)}\n>{text_description}"
+        return f"{formatting.bold(knob)}\n>{text_description}"
     except Exception as e:
-        # TODO: add logging
-        print(e)
+        current_app.logger.exception(f"Error while trying to find knob {knob}: {e}")
         return None
-
-
-def convert_links_to_links(description):
-    for span in description.select("a.reference.internal > span.std.std-ref"):
-        href = span.parent.get("href")
-        url = f"{KNOBS_URL}{href}"
-        span.string = f"<{url}|{span.string}>"
-        span.parent.unwrap()
-        span.unwrap()

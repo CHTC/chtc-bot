@@ -4,14 +4,10 @@ from typing import List
 
 class Handler(metaclass=abc.ABCMeta):
     @abc.abstractmethod
-    def handle(self, app, client, message):
+    def handle(self, message):
         """
         Parameters
         ----------
-        app
-            The Flask app.
-        client
-            A Slack client object.
         message
             The message from the Slack events API.
         """
@@ -24,14 +20,14 @@ class RegexMessageHandler(Handler):
 
         self.regex = regex
 
-    def handle(self, app, client, message):
+    def handle(self, message):
         matches = self.get_matches(message)
 
         if len(matches) == 0:
             return
 
         try:
-            self.handle_message(app, client, message, matches)
+            self.handle_message(message, matches)
         except Exception as e:
             print(e)
 
@@ -42,7 +38,7 @@ class RegexMessageHandler(Handler):
         return matches
 
     @abc.abstractmethod
-    def handle_message(self, app, client, message, matches: List[str]):
+    def handle_message(self, message, matches: List[str]):
         raise NotImplementedError
 
     def filter_matches(self, message, matches: List[str]):
