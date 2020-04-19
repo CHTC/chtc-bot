@@ -1,9 +1,13 @@
 import os
+import re
+import datetime
 
 from web.events import linkers
 from web.slashes.knobs import handle_knobs
 from web.slashes.jobads import handle_jobads
 from web.slashes.classad_eval import handle_classad_eval
+
+FIVE_MINUTES = datetime.timedelta(minutes=5).total_seconds()
 
 
 class Config:
@@ -18,8 +22,20 @@ class Config:
     TESTING_CHANNEL = "G011PN92WTV"
 
     MESSAGE_HANDLERS = [
-        linkers.FlightworthyTicketLinker(relink_timeout=300),
-        linkers.RTTicketLinker(relink_timeout=300),
+        linkers.FlightworthyTicketLinker(relink_timeout=FIVE_MINUTES),
+        linkers.RTTicketLinker(relink_timeout=FIVE_MINUTES),
+        linkers.TicketLinker(
+            regex=re.compile(r"bot-issue#(\d+)", re.IGNORECASE),
+            url="https://github.com/JoshKarpel/chtc-bot/issues/{}",
+            prefix="bot",
+            relink_timeout=FIVE_MINUTES,
+        ),
+        linkers.TicketLinker(
+            regex=re.compile(r"bot-pr#(\d+)", re.IGNORECASE),
+            url="https://github.com/JoshKarpel/chtc-bot/pull/{}",
+            prefix="bot",
+            relink_timeout=FIVE_MINUTES,
+        ),
     ]
 
     SLASH_COMMANDS = {

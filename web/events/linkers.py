@@ -10,7 +10,7 @@ from .. import http, slack
 
 
 class TicketLinker(RegexMessageHandler):
-    def __init__(self, *, regex, url, prefix, relink_timeout: int):
+    def __init__(self, *, regex, url, prefix, relink_timeout: float):
         super().__init__(regex=regex)
 
         self.url = url
@@ -57,6 +57,11 @@ class TicketLinker(RegexMessageHandler):
         self.last_ticket_cleanup = now
 
     def handle_message(self, app, client, message, matches: List[str]):
+        msg = self.generate_reply(matches)
+
+        slack.post_message(client, channel=message["channel"], text=msg)
+
+    def generate_reply(self, matches):
         msgs = []
         for ticket_id in matches:
             url = self.url.format(ticket_id)
@@ -69,7 +74,7 @@ class TicketLinker(RegexMessageHandler):
 
             msgs.append(msg)
 
-        slack.post_message(client, channel=message["channel"], text="\n".join(msgs))
+        return "\n".join(msgs)
 
     def get_ticket_summary(self, url: str):
         return None
