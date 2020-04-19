@@ -3,6 +3,7 @@ import pytest
 import bs4
 
 from web.slashes import jobads
+import os.path
 
 
 def test_get_attrs_description_returns_none_if_it_fails_to_find_the_knob():
@@ -20,7 +21,7 @@ def test_get_attrs_description_returns_none_if_it_fails_to_find_the_knob():
         (
             jobads.convert_links_to_links,
             """<a class="reference internal" href="../admin-manual/user-priorities-negotiation.html"><span class="doc">User Priorities and Negotiation</span></a>""",
-            f"<{jobads.ATTRS_URL}../admin-manual/user-priorities-negotiation.html|User Priorities and Negotiation>",
+            f"<{os.path.dirname(jobads.ATTRS_URL)}/../admin-manual/user-priorities-negotiation.html|User Priorities and Negotiation>",
         ),
     ],
 )

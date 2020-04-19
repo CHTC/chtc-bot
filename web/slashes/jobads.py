@@ -1,9 +1,12 @@
 import bs4
 from flask import request, current_app
 
+import os.path
+
 from .. import http, slack, utils
 from ..formatting import plural, bold
-from . import utils
+# Really?  I can't just use the full module name?
+from . import utils as su
 
 
 def handle_jobads():
@@ -13,7 +16,7 @@ def handle_jobads():
 
     client = current_app.config["SLACK_CLIENT"]
 
-    web.utils.run_in_thread(lambda: attrs_reply(client, channel, attrs, user))
+    utils.run_in_thread(lambda: attrs_reply(client, channel, attrs, user))
 
     return (
         f"Looking for job ad attribute{plural(attrs)} {', '.join(bold(a) for a in attrs)}",
@@ -59,9 +62,9 @@ def get_attrs_description(soup, attr):
             if span.text.lower() == attr.lower():
                 description = span.parent.parent.find_next("dd")
                 for converter in [
-                    utils.convert_code_to_backticks,
-                    utils.convert_code_to_backticks,
-                    utils.convert_strong_to_stars,
+                    su.convert_code_to_backticks,
+                    su.convert_code_to_backticks,
+                    su.convert_strong_to_stars,
                     convert_links_to_links,
                 ]:
                     converter(description)
@@ -79,7 +82,7 @@ def get_attrs_description(soup, attr):
 def convert_links_to_links(description):
     for span in description.select("a.reference.internal > span.doc"):
         href = span.parent.get("href")
-        url = f"{ATTRS_URL}{href}"
+        url = f"{os.path.dirname(ATTRS_URL)}/{href}"
         span.string = f"<{url}|{span.string}>"
         span.parent.unwrap()
         span.unwrap()
