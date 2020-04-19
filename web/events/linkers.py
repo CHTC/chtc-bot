@@ -56,10 +56,10 @@ class TicketLinker(RegexMessageHandler):
         }
         self.last_ticket_cleanup = now
 
-    def handle_message(self, app, client, message, matches: List[str]):
+    def handle_message(self, config, message, matches: List[str]):
         msg = self.generate_reply(matches)
 
-        slack.post_message(client, channel=message["channel"], text=msg)
+        slack.post_message(config["SLACK_CLIENT"], channel=message["channel"], text=msg)
 
     def generate_reply(self, matches):
         msgs = []
