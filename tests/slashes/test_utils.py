@@ -1,8 +1,9 @@
-import bs4
 import pytest
 
+import bs4
+
 from web.slashes import utils
-from web.slashes import knobs
+
 
 @pytest.mark.parametrize(
     "converter, html, expected",
@@ -21,11 +22,6 @@ from web.slashes import knobs
             utils.convert_strong_to_stars,
             "<strong>very powerful</strong>",
             "*very powerful*",
-        ),
-        (
-            utils.convert_links_to_links,
-            """<a class="reference internal" href="#condor-master-configuration-file-macros"><span class="std std-ref">condor_master Configuration File Macros</span></a>""",
-            f"<{knobs.KNOBS_URL}#condor-master-configuration-file-macros|condor_master Configuration File Macros>",
         ),
     ],
 )

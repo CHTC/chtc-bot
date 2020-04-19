@@ -6,6 +6,7 @@ from ..formatting import plural, bold
 
 from . import utils as su
 
+
 def handle_knobs():
     channel = request.form.get("channel_id")
     knobs = request.form.get("text").upper().split(" ")
@@ -67,3 +68,12 @@ def get_knob_description(knobs_page_soup, knob):
     except Exception as e:
         # TODO: add logging
         return None
+
+
+def convert_links_to_links(description):
+    for span in description.select("a.reference.internal > span.std.std-ref"):
+        href = span.parent.get("href")
+        url = f"{KNOBS_URL}{href}"
+        span.string = f"<{url}|{span.string}>"
+        span.parent.unwrap()
+        span.unwrap()

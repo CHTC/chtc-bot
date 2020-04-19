@@ -3,8 +3,7 @@ from flask import request, current_app
 
 from .. import http, slack, utils
 from ..formatting import plural, bold
-
-from . import knobs
+from . import utils
 
 
 def handle_jobads():
@@ -14,7 +13,7 @@ def handle_jobads():
 
     client = current_app.config["SLACK_CLIENT"]
 
-    utils.run_in_thread(lambda: attrs_reply(client, channel, attrs, user))
+    web.utils.run_in_thread(lambda: attrs_reply(client, channel, attrs, user))
 
     return (
         f"Looking for job ad attribute{plural(attrs)} {', '.join(bold(a) for a in attrs)}",
@@ -60,10 +59,10 @@ def get_attrs_description(soup, attr):
             if span.text.lower() == attr.lower():
                 description = span.parent.parent.find_next("dd")
                 for converter in [
-                    knobs.convert_code_to_backticks,
-                    knobs.convert_code_to_backticks,
-                    knobs.convert_strong_to_stars,
-                    knobs.convert_links_to_links,
+                    utils.convert_code_to_backticks,
+                    utils.convert_code_to_backticks,
+                    utils.convert_strong_to_stars,
+                    convert_links_to_links,
                 ]:
                     converter(description)
 
@@ -75,3 +74,12 @@ def get_attrs_description(soup, attr):
         # TODO: add logging
         print(e)
         return None
+
+
+def convert_links_to_links(description):
+    for span in description.select("a.reference.internal > span.doc"):
+        href = span.parent.get("href")
+        url = f"{ATTRS_URL}{href}"
+        span.string = f"<{url}|{span.string}>"
+        span.parent.unwrap()
+        span.unwrap()
