@@ -84,7 +84,7 @@ class FlightworthyTicketLinker(TicketLinker):
     def __init__(self, *, relink_timeout):
         super().__init__(
             relink_timeout=relink_timeout,
-            regex=re.compile(r"gt#(\d+)", re.I),
+            regex=re.compile(r"gt#([1-9]\d*)[^ A-Za-z]*(?: |$)", re.I),
             url="https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn={}",
             prefix="GT",
         )
@@ -107,7 +107,7 @@ class RTTicketLinker(TicketLinker):
     def __init__(self, *, relink_timeout):
         super().__init__(
             relink_timeout=relink_timeout,
-            regex=re.compile(r"rt#(\d+)", re.I),
+            regex=re.compile(r"rt#([1-9]\d*)[^ A-Za-z]*(?: |$)", re.I),
             url="https://crt.cs.wisc.edu/rt/Ticket/Display.html?id={}",
             prefix="RT",
         )
