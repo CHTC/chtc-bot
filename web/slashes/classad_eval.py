@@ -3,7 +3,7 @@ from typing import Tuple, List
 import re
 import textwrap
 
-from flask import request
+from flask import current_app, request
 
 import htcondor
 import classad
@@ -32,11 +32,17 @@ def generate_classad_eval_reply(user, text):
     try:
         ad, exprs = parse(text)
     except Exception as e:
+        current_app.logger.exception(
+            f"Failed to parse ad or expressions (raw: {text}): {e}"
+        )
         return f"Failed to parse ad or expressions: {e}"
 
     try:
         results = evaluate(ad, exprs)
     except Exception as e:
+        current_app.logger.exception(
+            f"Failed to evaluate an expression (ad: {repr(ad)}, expressions: {[exprs]}): {e}"
+        )
         return f"Failed to evaluate an expression: {e}"
 
     prefix = f"<@{user}> asked me to evaluate {'a ' if len(exprs) == 1 else ''}ClassAd expression{formatting.plural(exprs)}"

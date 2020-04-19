@@ -67,5 +67,5 @@ def get_knob_description(knobs_page_soup, knob):
 
         return f"{formatting.bold(knob)}\n>{text_description}"
     except Exception as e:
-        current_app.logger.exception(f"Error while trying to find knob {knob}")
+        current_app.logger.exception(f"Error while trying to find knob {knob}: {e}")
         return None

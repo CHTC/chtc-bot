@@ -72,5 +72,5 @@ def get_attrs_description(soup, attr):
         return None
 
     except Exception as e:
-        current_app.logger.exception(f"Error while trying to find job attr {attr}")
+        current_app.logger.exception(f"Error while trying to find job attr {attr}: {e}")
         return None
