@@ -10,6 +10,10 @@ from web.slashes.classad_eval import handle_classad_eval
 DEBUG = False
 TESTING = False
 
+EXECUTOR_TYPE = "thread"
+EXECUTOR_MAX_WORKERS = None  # let it decide
+EXECUTOR_PROPAGATE_EXCEPTIONS = True
+
 # The user ID for this bot
 BOT_USER_ID = "U011WEDH24U"
 

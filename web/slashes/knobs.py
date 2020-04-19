@@ -1,7 +1,8 @@
 import bs4
 from flask import request, current_app
 
-from .. import http, slack, formatting, html, utils
+from ..executor import executor
+from .. import http, slack, formatting, html
 
 
 def handle_knobs():
@@ -9,9 +10,7 @@ def handle_knobs():
     knobs = html.unescape(request.form.get("text")).upper().split(" ")
     user = request.form.get("user_id")
 
-    client = current_app.config["SLACK_CLIENT"]
-
-    utils.run_in_thread(lambda: knobs_reply(client, channel, knobs, user))
+    executor.submit(knobs_reply, channel, knobs, user)
 
     return (
         f"Looking for knob{formatting.plural(knobs)} {', '.join(formatting.bold(k) for k in knobs)}",
@@ -24,7 +23,7 @@ KNOBS_URL = (
 )
 
 
-def knobs_reply(client, channel, knobs, user):
+def knobs_reply(channel, knobs, user):
     response = http.cached_get_url(KNOBS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
@@ -48,7 +47,7 @@ def knobs_reply(client, channel, knobs, user):
 
     msg = "\n".join(msg_lines)
 
-    slack.post_message(client, channel=channel, text=msg)
+    slack.post_message(channel=channel, text=msg)
 
 
 def get_knob_description(knobs_page_soup, knob):

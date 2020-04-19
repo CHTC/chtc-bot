@@ -1,13 +1,7 @@
 from typing import Union
 
-import threading
 import time
 import datetime
-
-
-def run_in_thread(func):
-    """Run a zero-argument function asynchronously in a thread (use a lambda to capture local variables)."""
-    threading.Thread(target=func).start()
 
 
 class ForgetfulDict:

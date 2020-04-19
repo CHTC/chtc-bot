@@ -3,12 +3,13 @@ from typing import Tuple, List
 import re
 import textwrap
 
-from flask import request, current_app
+from flask import request
 
 import htcondor
 import classad
 
-from .. import slack, formatting, html, utils
+from ..executor import executor
+from .. import slack, formatting, html
 
 
 def handle_classad_eval():
@@ -16,17 +17,15 @@ def handle_classad_eval():
     user = request.form.get("user_id")
     text = html.unescape(request.form.get("text"))
 
-    client = current_app.config["SLACK_CLIENT"]
-
-    utils.run_in_thread(lambda: classad_eval_reply(client, channel, user, text))
+    executor.submit(classad_eval_reply, channel, user, text)
 
     return f":thinking_face: :newspaper:", 200
 
 
-def classad_eval_reply(client, channel, user, text):
+def classad_eval_reply(channel, user, text):
     msg = generate_classad_eval_reply(user, text)
 
-    slack.post_message(client, channel=channel, text=msg)
+    slack.post_message(channel=channel, text=msg)
 
 
 def generate_classad_eval_reply(user, text):

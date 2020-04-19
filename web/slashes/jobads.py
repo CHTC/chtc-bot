@@ -3,7 +3,8 @@ from flask import request, current_app
 
 import os.path
 
-from .. import http, slack, formatting, html, utils
+from ..executor import executor
+from .. import http, slack, formatting, html
 
 
 def handle_jobads():
@@ -11,9 +12,7 @@ def handle_jobads():
     attrs = html.unescape(request.form.get("text")).split(" ")
     user = request.form.get("user_id")
 
-    client = current_app.config["SLACK_CLIENT"]
-
-    utils.run_in_thread(lambda: attrs_reply(client, channel, attrs, user))
+    executor.submit(attrs_reply, channel, attrs, user)
 
     return (
         f"Looking for job ad attribute{formatting.plural(attrs)} {', '.join(formatting.bold(a) for a in attrs)}",
@@ -24,7 +23,7 @@ def handle_jobads():
 ATTRS_URL = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
 
 
-def attrs_reply(client, channel, attrs, user):
+def attrs_reply(channel, attrs, user):
     response = http.cached_get_url(ATTRS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
@@ -48,7 +47,7 @@ def attrs_reply(client, channel, attrs, user):
 
     msg = "\n".join(msg_lines)
 
-    slack.post_message(client, channel=channel, text=msg)
+    slack.post_message(channel=channel, text=msg)
 
 
 def get_attrs_description(soup, attr):
