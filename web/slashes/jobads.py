@@ -3,12 +3,12 @@ from flask import request, current_app
 
 import os.path
 
-from .. import http, slack, formatting, utils
+from .. import http, slack, formatting, html, utils
 
 
 def handle_jobads():
     channel = request.form.get("channel_id")
-    attrs = request.form.get("text").split(" ")
+    attrs = html.unescape(request.form.get("text")).split(" ")
     user = request.form.get("user_id")
 
     client = current_app.config["SLACK_CLIENT"]

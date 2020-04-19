@@ -8,21 +8,13 @@ from flask import request, current_app
 import htcondor
 import classad
 
-from .. import slack, formatting, utils
-
-HTML_UNESCAPES = {
-    "&gt;": ">",
-    "&lt;": "<",
-    "&amp;": "&",
-}
+from .. import slack, formatting, html, utils
 
 
 def handle_classad_eval():
     channel = request.form.get("channel_id")
     user = request.form.get("user_id")
-    text = request.form.get("text")
-    for from_, to_ in HTML_UNESCAPES.items():
-        text = text.replace(from_, to_)
+    text = html.unescape(request.form.get("text"))
 
     client = current_app.config["SLACK_CLIENT"]
 

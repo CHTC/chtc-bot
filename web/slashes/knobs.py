@@ -1,12 +1,12 @@
 import bs4
 from flask import request, current_app
 
-from .. import http, slack, formatting, utils
+from .. import http, slack, formatting, html, utils
 
 
 def handle_knobs():
     channel = request.form.get("channel_id")
-    knobs = request.form.get("text").upper().split(" ")
+    knobs = html.unescape(request.form.get("text")).upper().split(" ")
     user = request.form.get("user_id")
 
     client = current_app.config["SLACK_CLIENT"]
