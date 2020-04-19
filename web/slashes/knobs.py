@@ -4,6 +4,7 @@ from flask import request, current_app
 from .. import http, slack, utils
 from ..formatting import plural, bold
 
+from . import utils as su
 
 def handle_knobs():
     channel = request.form.get("channel_id")
@@ -54,10 +55,10 @@ def get_knob_description(knobs_page_soup, knob):
         header = knobs_page_soup.find("span", id=knob)
         description = header.parent.find_next("dd")
         for converter in [
-            convert_code_to_backticks,
-            convert_code_to_backticks,
-            convert_strong_to_stars,
-            convert_links_to_links,
+            su.convert_code_to_backticks,
+            su.convert_code_to_backticks,
+            su.convert_strong_to_stars,
+            su.convert_links_to_links,
         ]:
             converter(description)
         text_description = description.text.replace("\n", " ")
@@ -66,32 +67,3 @@ def get_knob_description(knobs_page_soup, knob):
     except Exception as e:
         # TODO: add logging
         return None
-
-
-def convert_em_to_underscores(description):
-    for em in description.find_all("em"):
-        em.string = f"_{em.string}_"
-        em.unwrap()
-
-
-def convert_code_to_backticks(description):
-    for span in description.select("code.docutils.literal.notranslate > span.pre"):
-        span.string = f"`{span.string}`"
-        span.parent.unwrap()
-        span.unwrap()
-
-
-# My code-reuse detector is going off.
-def convert_strong_to_stars(description):
-    for em in description.find_all("strong"):
-        em.string = f"*{em.string}*"
-        em.unwrap()
-
-
-def convert_links_to_links(description):
-    for span in description.select("a.reference.internal > span.std.std-ref"):
-        href = span.parent.get("href")
-        url = f"{KNOBS_URL}{href}"
-        span.string = f"<{url}|{span.string}>"
-        span.parent.unwrap()
-        span.unwrap()
