@@ -1,5 +1,7 @@
 import pytest
 
+import time
+
 import htcondor
 import classad
 
@@ -54,3 +56,28 @@ def test_parsing(text, expected):
 )
 def test_evaluating(ad, exprs, expected):
     assert list(classad_eval.evaluate(ad, exprs).values()) == expected
+
+
+def test_handle_classad_eval_end_to_end(mocker, client):
+    mock = mocker.patch("web.slack.post_message")
+
+    client.post(
+        "/slash/classad_eval",
+        data=dict(
+            channel_id="1234", user_id="5678", text="'[foo = 5]' 'foo' 'bar' '1 + 1'"
+        ),
+    )
+
+    # let the executor run
+    time.sleep(0.1)
+
+    assert mock.call_count == 1
+
+    msg = mock.call_args[1]["text"]
+
+    # make a few assertions about the output message,
+    # but without holding on too tight
+    assert "<@5678>" in msg
+    assert "foo = 5" in msg
+    assert "undefined" in msg
+    assert "2" in msg
