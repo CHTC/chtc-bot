@@ -73,6 +73,10 @@ def test_handle_classad_eval_end_to_end(mocker, client):
 
     assert mock.call_count == 1
 
+    channel = mock.call_args[1]["channel"]
+
+    assert channel == "1234"
+
     msg = mock.call_args[1]["text"]
 
     # make a few assertions about the output message,

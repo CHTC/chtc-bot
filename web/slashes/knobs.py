@@ -1,5 +1,5 @@
 import bs4
-from flask import request, current_app
+from flask import current_app, request
 
 from ..executor import executor
 from .. import http, slack, formatting, html
@@ -63,10 +63,9 @@ def get_knob_description(knobs_page_soup, knob):
             ),
         ]:
             converter(description)
-        text_description = description.text.replace("\n", " ")
+        text_description = formatting.compress_whitespace(description.text)
 
         return f"{formatting.bold(knob)}\n>{text_description}"
     except Exception as e:
-        # TODO: add logging
-        print(e)
+        current_app.logger.exception(f"Error while trying to find knob {knob}")
         return None

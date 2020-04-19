@@ -1,5 +1,5 @@
 import bs4
-from flask import request, current_app
+from flask import current_app, request
 
 import os.path
 
@@ -67,10 +67,10 @@ def get_attrs_description(soup, attr):
                 ]:
                     converter(description)
 
-                text_description = description.text.replace("\n", " ")
+                text_description = formatting.compress_whitespace(description.text)
                 return f"{formatting.bold(span.text)}\n>{text_description}"
         return None
 
     except Exception as e:
-        # TODO: add logging
+        current_app.logger.exception(f"Error while trying to find job attr {attr}")
         return None

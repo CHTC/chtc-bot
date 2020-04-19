@@ -21,6 +21,13 @@ def link(url, text=None):
         return url
 
 
+def compress_whitespace(text):
+    """
+    Convert all whitespaces into a single space between words.
+    """
+    return " ".join(text.split())
+
+
 def inplace_convert_em_to_underscores(soup):
     for em in soup.find_all("em"):
         em.string = italic(em.string)
