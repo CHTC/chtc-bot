@@ -25,7 +25,7 @@ class RegexMessageHandler(Handler):
         self.regex = regex
 
     def handle(self, app, client, message):
-        matches = self.get_matches(message["text"])
+        matches = self.get_matches(message)
 
         if len(matches) == 0:
             return
