@@ -31,7 +31,7 @@ def _handle_message(event_data):
 
     for handler in current_app.config["MESSAGE_HANDLERS"]:
         try:
-            handler.handle(current_app.config, message)
+            handler.handle(message)
         except Exception as e:
             current_app.logger.exception(f"Uncaught exception in {handler}: {e}")
             pass
