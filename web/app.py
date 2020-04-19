@@ -28,9 +28,7 @@ def create_app(config):
 
             # wire up individual event handlers
             for event_handler, args, kwargs in events.EVENT_HANDLERS:
-                slack_events_adapter.on(*args, **kwargs)(
-                    functools.partial(event_handler, config)
-                )
+                slack_events_adapter.on(*args, **kwargs)(event_handler)
 
         # add routes for slash commands as specified in base.py
         for command, command_handler in app.config["SLASH_COMMANDS"].items():
