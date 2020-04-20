@@ -1,10 +1,22 @@
 coverage:
-  range: 50..90
+  range: 50..100
   round: down
   precision: 0
+  
   status:
-    project: off
+    
+    project:
+      default:
+        target: auto
+        threshold: 20
+        only_pulls: true
+        
     patch: off
+      default:
+        target: auto
+        threshold: 50
+        only_pulls: true
 
 comment:
   layout: "diff, files"
+  require_changes: false
