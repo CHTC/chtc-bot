@@ -15,7 +15,7 @@ def handle_submits():
     executor.submit(submits_reply, channel, submits, user)
 
     return (
-        f"Looking for submit file command{formatting.plural(attrs)} {', '.join(formatting.bold(a) for a in attrs)}",
+        f"Looking for submit file command{formatting.plural(submits)} {', '.join(formatting.bold(a) for a in submits)}",
         200,
     )
 
@@ -23,14 +23,14 @@ def handle_submits():
 SUBMITS_URL = "https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html"
 
 
-def submits_reply(channel, attrs, user):
+def submits_reply(channel, submits, user):
     response = http.cached_get_url(SUBMITS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 
     descriptions = {attr: get_submits_description(soup, attr) for submit in submits}
 
     msg_lines = [
-        f"<@{user}> asked for information on submit file command{formatting.plural(attrs)} {', '.join(formatting.bold(a) for s in submits)}"
+        f"<@{user}> asked for information on submit file command{formatting.plural(submits)} {', '.join(formatting.bold(a) for s in submits)}"
     ]
 
     # TODO: this is clunky, we should make a function for this kind of grouping
