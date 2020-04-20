@@ -54,3 +54,9 @@ def inplace_convert_internal_links_to_links(soup, base_url, inner_span_classes):
         span.string = link(url, span.string)
         span.parent.unwrap()
         span.unwrap()
+
+
+def inplace_convert_code_to_code(soup):
+    codes = soup.select("div.highlight-default.notranslate > div.highlight > pre")
+    for code in codes:
+        code.replace_with(f"```{code.text}```")

@@ -7,6 +7,7 @@ from .. import http, slack, formatting, html
 import re
 import os
 
+
 def handle_submits():
     channel = request.form.get("channel_id")
     submits = html.unescape(request.form.get("text")).split(" ")
@@ -64,6 +65,7 @@ def get_submits_description(soup, attr):
                 lambda soup: formatting.inplace_convert_internal_links_to_links(
                     soup, os.path.dirname(SUBMITS_URL), "std.std-ref"
                 ),
+                formatting.inplace_convert_code_to_code,
             ]:
                 converter(description)
 

@@ -267,8 +267,7 @@ def test_handle_jobads_end_to_end(mocker, client):
     mock = mocker.patch("web.slack.post_message")
 
     client.post(
-        "/slash/submits",
-        data=dict(channel_id="1234", user_id="5678", text="error"),
+        "/slash/submits", data=dict(channel_id="1234", user_id="5678", text="error"),
     )
 
     # let the executor run

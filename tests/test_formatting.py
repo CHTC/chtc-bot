@@ -60,6 +60,11 @@ KNOBS_URL = (
             """<a class="reference internal" href="../admin-manual/user-priorities-negotiation.html"><span class="doc">User Priorities and Negotiation</span></a>""",
             f"<{os.path.dirname(ATTRS_URL)}/../admin-manual/user-priorities-negotiation.html|User Priorities and Negotiation>",
         ),
+        (
+            formatting.inplace_convert_code_to_code,
+            """<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;=&lt;</span><span class="n">value</span><span class="o">&gt;</span></pre></div>""",
+            "```<name>=<value>```",
+        ),
     ],
 )
 def test_convert_html_to_markdown(converter, html, expected):
