@@ -1,20 +1,25 @@
 def plural(collection):
+    """Return an 's' if the collection has any number of elements but 1."""
     return "" if len(collection) == 1 else "s"
 
 
 def bold(text):
+    """Wrap text in markdown bold text markers."""
     return f"*{text}*"
 
 
 def italic(text):
+    """Wrap text in markdown italic text markers."""
     return f"_{text}_"
 
 
 def fixed(text):
+    """Wrap text in markdown inline fixed text markers."""
     return f"`{text}`"
 
 
 def link(url, text=None):
+    """Construct a Slack-encoded link. If text is None, the raw URL is returned."""
     if text is not None:
         return f"<{url}|{text}>"
     else:
@@ -22,9 +27,7 @@ def link(url, text=None):
 
 
 def compress_whitespace(text):
-    """
-    Convert all whitespaces into a single space between words.
-    """
+    """Convert all whitespaces into a single space between words."""
     return " ".join(text.split())
 
 

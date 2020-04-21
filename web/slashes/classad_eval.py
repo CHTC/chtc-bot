@@ -1,4 +1,4 @@
-from typing import Tuple, List
+from typing import Tuple, List, Collection, Mapping, Any
 
 import re
 import textwrap
@@ -23,13 +23,13 @@ def handle_classad_eval():
     return f":thinking_face: :newspaper:", 200
 
 
-def classad_eval_reply(channel, user, text):
+def classad_eval_reply(channel: str, user: str, text: str):
     msg = generate_classad_eval_reply(user, text)
 
-    slack.post_message(channel=channel, text=msg)
+    slack.post_message(text=msg, channel=channel)
 
 
-def generate_classad_eval_reply(user, text):
+def generate_classad_eval_reply(user: str, text: str):
     try:
         ad, exprs = parse(text)
     except Exception as e:
@@ -69,8 +69,9 @@ def generate_classad_eval_reply(user, text):
 RE_PARTS = re.compile(r"'(.*?)'")
 
 
-def format_result(x):
-    return " ".join(x.strip() for x in str(x).splitlines())
+def format_result(result: str):
+    """Collapse newlines into spaces."""
+    return " ".join(s.strip() for s in str(result).splitlines())
 
 
 def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
@@ -82,5 +83,8 @@ def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
     return ad, exprs
 
 
-def evaluate(ad, exprs):
+def evaluate(
+    ad: classad.ClassAd, exprs: Collection[classad.ExprTree]
+) -> Mapping[classad.ExprTree, Any]:
+    """Evaluate each expression in the context of the ad."""
     return {expr: expr.simplify(ad) for expr in exprs}

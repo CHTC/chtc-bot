@@ -1,3 +1,5 @@
+from typing import Collection
+
 import os.path
 import html
 
@@ -13,7 +15,9 @@ def handle_jobads():
     attrs = html.unescape(request.form.get("text")).split(" ")
     user = request.form.get("user_id")
 
-    executor.submit(attrs_reply, channel, attrs, user)
+    executor.submit(
+        attrs_reply, channel, user, attrs,
+    )
 
     return (
         f"Looking for job ad attribute{formatting.plural(attrs)} {', '.join(formatting.bold(a) for a in attrs)}",
@@ -24,7 +28,9 @@ def handle_jobads():
 ATTRS_URL = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
 
 
-def attrs_reply(channel, attrs, user):
+def attrs_reply(
+    channel: str, user: str, attrs: Collection[str],
+):
     response = http.cached_get_url(ATTRS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 

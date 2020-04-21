@@ -12,7 +12,7 @@ def handle_knobs():
     knobs = html.unescape(request.form.get("text")).upper().split(" ")
     user = request.form.get("user_id")
 
-    executor.submit(knobs_reply, channel, knobs, user)
+    executor.submit(knobs_reply, channel, user, knobs)
 
     return (
         f"Looking for knob{formatting.plural(knobs)} {', '.join(formatting.bold(k) for k in knobs)}",
@@ -25,7 +25,7 @@ KNOBS_URL = (
 )
 
 
-def knobs_reply(channel, knobs, user):
+def knobs_reply(channel, user, knobs):
     response = http.cached_get_url(KNOBS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 

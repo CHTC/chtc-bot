@@ -18,22 +18,22 @@ BOT_USER_ID = "U011WEDH24U"
 # The channel ID for the testing channel on the CHTC slack
 TESTING_CHANNEL = "G011PN92WTV"
 
-FIVE_MINUTES = datetime.timedelta(minutes=5).total_seconds()
+five_minutes = datetime.timedelta(minutes=5).total_seconds()
 
 MESSAGE_HANDLERS = [
-    linkers.FlightworthyTicketLinker(relink_timeout=FIVE_MINUTES),
-    linkers.RTTicketLinker(relink_timeout=FIVE_MINUTES),
+    linkers.FlightworthyTicketLinker(relink_timeout=five_minutes),
+    linkers.RTTicketLinker(relink_timeout=five_minutes),
     linkers.TicketLinker(
         regex=re.compile(r"bot-issue#(\d+)", re.IGNORECASE),
         url="https://github.com/JoshKarpel/chtc-bot/issues/{}",
         prefix="bot",
-        relink_timeout=FIVE_MINUTES,
+        relink_timeout=five_minutes,
     ),
     linkers.TicketLinker(
         regex=re.compile(r"bot-pr#(\d+)", re.IGNORECASE),
         url="https://github.com/JoshKarpel/chtc-bot/pull/{}",
         prefix="bot",
-        relink_timeout=FIVE_MINUTES,
+        relink_timeout=five_minutes,
     ),
 ]
 

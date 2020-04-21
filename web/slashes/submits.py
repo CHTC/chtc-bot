@@ -14,7 +14,7 @@ def handle_submits():
     submits = html.unescape(request.form.get("text")).split(" ")
     user = request.form.get("user_id")
 
-    executor.submit(submits_reply, channel, submits, user)
+    executor.submit(submits_reply, channel, user, submits)
 
     return (
         f"Looking for submit file command{formatting.plural(submits)} {', '.join(formatting.bold(s) for s in submits)}",
@@ -25,7 +25,9 @@ def handle_submits():
 SUBMITS_URL = "https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html"
 
 
-def submits_reply(channel, submits, user):
+def submits_reply(
+    channel, user, submits,
+):
     response = http.cached_get_url(SUBMITS_URL)
     soup = bs4.BeautifulSoup(response.text, "html.parser")
 

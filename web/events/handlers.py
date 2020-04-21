@@ -2,7 +2,7 @@ import abc
 from typing import List
 
 
-class Handler(metaclass=abc.ABCMeta):
+class MessageHandler(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def handle(self, message):
         """
@@ -14,7 +14,7 @@ class Handler(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
 
-class RegexMessageHandler(Handler):
+class RegexMessageHandler(MessageHandler):
     def __init__(self, *, regex):
         super().__init__()
 

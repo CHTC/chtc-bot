@@ -15,6 +15,10 @@ def event_handler(*args, **kwargs):
 
 @event_handler("message")
 def handle_message_event(event_data):
+    """
+    This is the raw incoming event handler; it will be passed a Slack API event
+    as a Python dictionary parsed from JSON.
+    """
     # skip edits
     if event_data["event"].get("subtype") == "message_changed":
         return

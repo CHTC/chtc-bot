@@ -59,9 +59,13 @@ class TicketLinker(RegexMessageHandler):
     def handle_message(self, message, matches: List[str]):
         msg = self.generate_reply(matches)
 
-        slack.post_message(
-            text=msg, channel=message["channel"], thread_ts=message.get("thread_ts")
-        )
+        # respond in the same channel the message was sent in
+        channel = message["channel"]
+
+        # if the message was in a thread, respond in that thread
+        thread_ts = message.get("thread_ts")
+
+        slack.post_message(text=msg, channel=channel, thread_ts=thread_ts)
 
     def generate_reply(self, matches):
         msgs = []

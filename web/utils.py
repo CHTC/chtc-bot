@@ -50,6 +50,24 @@ V = TypeVar("V")
 def partition(
     mapping: Mapping[K, V], key: Optional[Callable[[V], bool]] = None
 ) -> Tuple[Dict[K, V], Dict[K, V]]:
+    """
+    Partition the items of a mapping into two new mappings by evaluating a key
+    function against their values. The first (second) mapping is the one where
+    the key function returned True (False).
+
+    Parameters
+    ----------
+    mapping
+        A mapping to partition into two groups by the key function.
+    key
+        The function applied to each value in mapping to determine which group
+        it should be in.
+
+    Returns
+    -------
+    t, f
+        Two mappings; one for the key-True items, and one for the key-False items.
+    """
     if key is None:
         key = lambda _: _
 
@@ -58,7 +76,9 @@ def partition(
     for k, v in mapping.items():
         try:
             goodbad[key(v)][k] = v
-        except KeyError:
-            raise ValueError("key function must return a bool (True or False)")
+        except KeyError as e:
+            raise ValueError(
+                "The partition key function must return a bool (True or False)"
+            ) from e
 
     return goodbad[True], goodbad[False]
