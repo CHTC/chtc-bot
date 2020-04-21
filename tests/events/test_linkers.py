@@ -63,3 +63,35 @@ def test_linker_matches(linker, prefix, message, expected):
     assert len(matches) == len(expected)
     for (match, expect) in zip(matches, expected):
         assert match == expect
+
+
+@pytest.mark.parametrize(
+    "message, expected",
+    [
+        (
+            {"text": "bot#1", "channel": "1234"},
+            {"text": "<foobar/1|bot#1>", "channel": "1234", "thread_ts": None},
+        ),
+        (
+            {"text": "bot#1", "channel": "1234", "thread_ts": "1.2"},
+            {"text": "<foobar/1|bot#1>", "channel": "1234", "thread_ts": "1.2"},
+        ),
+    ],
+)
+def test_generic_linker_end_to_end(mocker, message, expected):
+    mock = mocker.patch("web.slack.post_message")
+
+    linker = linkers.TicketLinker(
+        regex=re.compile(r"bot#(\d+)", re.IGNORECASE),
+        url="foobar/{}",
+        prefix="bot",
+        relink_timeout=300,
+    )
+
+    linker.handle(message)
+
+    assert mock.call_count == 1
+
+    args, kwargs = mock.call_args
+
+    assert kwargs == expected

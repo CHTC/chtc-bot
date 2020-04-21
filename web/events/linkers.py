@@ -59,7 +59,9 @@ class TicketLinker(RegexMessageHandler):
     def handle_message(self, message, matches: List[str]):
         msg = self.generate_reply(matches)
 
-        slack.post_message(channel=message["channel"], text=msg)
+        slack.post_message(
+            text=msg, channel=message["channel"], thread_ts=message.get("thread_ts")
+        )
 
     def generate_reply(self, matches):
         msgs = []
