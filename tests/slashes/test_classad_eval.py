@@ -44,6 +44,14 @@ def test_parsing(text, expected):
 
 
 @pytest.mark.parametrize(
+    "text", ["'foo'", "'[foo]'", "'[foo = 1]' '^'",],
+)
+def test_bad_parsing(text):
+    with pytest.raises(SyntaxError):
+        classad_eval.parse(text)
+
+
+@pytest.mark.parametrize(
     "ad, exprs, expected",
     [
         (classad.ClassAd({"foo": 5}), [classad.ExprTree("foo")], [5]),

@@ -79,7 +79,7 @@ def format_result(result: str):
 def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
     parts = RE_PARTS.findall(text)
 
-    ad = classad.parseOne(parts[0])
+    ad = classad.ClassAd(parts[0])
     exprs = [classad.ExprTree(s) for s in parts[1:]]
 
     return ad, exprs
