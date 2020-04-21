@@ -1,4 +1,6 @@
-from typing import Union
+from typing import Union, Mapping, TypeVar, Optional, Callable, Tuple, Dict
+
+import collections
 
 import time
 import datetime
@@ -39,3 +41,24 @@ class ForgetfulDict:
         self._memory = {k: v for k, v in self._memory.items() if k in self._cache}
 
         self._last_cleanup = now
+
+
+K = TypeVar("K")
+V = TypeVar("V")
+
+
+def partition(
+    mapping: Mapping[K, V], key: Optional[Callable[[V], bool]] = None
+) -> Tuple[Dict[K, V], Dict[K, V]]:
+    if key is None:
+        key = lambda _: _
+
+    goodbad = {True: {}, False: {}}
+
+    for k, v in mapping.items():
+        try:
+            goodbad[key(v)][k] = v
+        except KeyError:
+            raise ValueError("key function must return a bool (True or False)")
+
+    return goodbad[True], goodbad[False]

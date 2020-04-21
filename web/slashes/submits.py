@@ -6,7 +6,7 @@ import bs4
 from flask import current_app, request
 
 from ..executor import executor
-from .. import http, slack, formatting
+from .. import http, slack, formatting, utils
 
 
 def handle_submits():
@@ -35,9 +35,7 @@ def submits_reply(channel, submits, user):
         f"<@{user}> asked for information on submit file command{formatting.plural(submits)} {', '.join(formatting.bold(s) for s in submits)}"
     ]
 
-    # TODO: this is clunky, we should make a function for this kind of grouping
-    good = {k: v for k, v in descriptions.items() if v is not None}
-    bad = {k: v for k, v in descriptions.items() if v is None}
+    good, bad = utils.partition(descriptions, key=lambda v: v is not None)
 
     if bad:
         p1 = "they were" if len(bad) > 1 else "it was"
