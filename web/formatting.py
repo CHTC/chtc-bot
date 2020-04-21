@@ -28,21 +28,23 @@ def compress_whitespace(text):
     return " ".join(text.split())
 
 
-def inplace_convert_em_to_underscores(soup):
-    for em in soup.find_all("em"):
+def inplace_convert_em_to_underscores(soup, selector="em"):
+    for em in soup.find_all(selector):
         em.string = italic(em.string)
         em.unwrap()
 
 
-def inplace_convert_code_to_backticks(soup):
-    for span in soup.select("code.docutils.literal.notranslate > span.pre"):
+def inplace_convert_inline_code_to_backticks(
+    soup, selector="code.docutils.literal.notranslate > span.pre"
+):
+    for span in soup.select(selector):
         span.string = fixed(span.string)
         span.parent.unwrap()
         span.unwrap()
 
 
-def inplace_convert_strong_to_stars(soup):
-    for em in soup.find_all("strong"):
+def inplace_convert_strong_to_stars(soup, selector="strong"):
+    for em in soup.find_all(selector):
         em.string = bold(em.string)
         em.unwrap()
 
@@ -56,7 +58,9 @@ def inplace_convert_internal_links_to_links(soup, base_url, inner_span_classes):
         span.unwrap()
 
 
-def inplace_convert_code_to_code(soup):
-    codes = soup.select("div.highlight-default.notranslate > div.highlight > pre")
+def inplace_convert_code_block_to_code_block(
+    soup, selector="div.highlight-default.notranslate > div.highlight > pre"
+):
+    codes = soup.select(selector)
     for code in codes:
         code.replace_with(f"```{code.text}```")

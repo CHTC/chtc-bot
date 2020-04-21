@@ -1,8 +1,10 @@
+import html
+
 import bs4
 from flask import current_app, request
 
 from ..executor import executor
-from .. import http, slack, formatting, html
+from .. import http, slack, formatting
 
 
 def handle_knobs():
@@ -56,7 +58,7 @@ def get_knob_description(knobs_page_soup, knob):
         description = header.parent.find_next("dd")
         for converter in [
             formatting.inplace_convert_em_to_underscores,
-            formatting.inplace_convert_code_to_backticks,
+            formatting.inplace_convert_inline_code_to_backticks,
             formatting.inplace_convert_strong_to_stars,
             lambda soup: formatting.inplace_convert_internal_links_to_links(
                 soup, KNOBS_URL, "std.std-ref"

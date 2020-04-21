@@ -2,6 +2,7 @@ from typing import Tuple, List
 
 import re
 import textwrap
+import html
 
 from flask import current_app, request
 
@@ -9,7 +10,7 @@ import htcondor
 import classad
 
 from ..executor import executor
-from .. import slack, formatting, html
+from .. import slack, formatting
 
 
 def handle_classad_eval():

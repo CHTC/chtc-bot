@@ -37,7 +37,7 @@ KNOBS_URL = (
             "_this_ _many_many_ _condor_daemon_name_",
         ),
         (
-            formatting.inplace_convert_code_to_backticks,
+            formatting.inplace_convert_inline_code_to_backticks,
             '<code class="docutils literal notranslate"><span class="pre">MASTER_NAME</span></code>',
             "`MASTER_NAME`",
         ),
@@ -61,7 +61,7 @@ KNOBS_URL = (
             f"<{os.path.dirname(ATTRS_URL)}/../admin-manual/user-priorities-negotiation.html|User Priorities and Negotiation>",
         ),
         (
-            formatting.inplace_convert_code_to_code,
+            formatting.inplace_convert_code_block_to_code_block,
             """<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;=&lt;</span><span class="n">value</span><span class="o">&gt;</span></pre></div>""",
             "```<name>=<value>```",
         ),

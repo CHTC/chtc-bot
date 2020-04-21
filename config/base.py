@@ -1,11 +1,8 @@
 import re
 import datetime
 
+import web.slashes as slashes
 from web.events import linkers
-from web.slashes.knobs import handle_knobs
-from web.slashes.jobads import handle_jobads
-from web.slashes.submits import handle_submits
-from web.slashes.classad_eval import handle_classad_eval
 
 
 DEBUG = False
@@ -41,8 +38,8 @@ MESSAGE_HANDLERS = [
 ]
 
 SLASH_COMMANDS = {
-    "knobs": handle_knobs,
-    "classad_eval": handle_classad_eval,
-    "jobads": handle_jobads,
-    "submits": handle_submits,
+    "knobs": slashes.handle_knobs,
+    "classad_eval": slashes.handle_classad_eval,
+    "jobads": slashes.handle_jobads,
+    "submits": slashes.handle_submits,
 }

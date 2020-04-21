@@ -1,11 +1,12 @@
+import re
+import os
+import html
+
 import bs4
 from flask import current_app, request
 
 from ..executor import executor
-from .. import http, slack, formatting, html
-
-import re
-import os
+from .. import http, slack, formatting
 
 
 def handle_submits():
@@ -60,12 +61,12 @@ def get_submits_description(soup, attr):
             description = dt.find_next("dd")
             for converter in [
                 formatting.inplace_convert_em_to_underscores,
-                formatting.inplace_convert_code_to_backticks,
+                formatting.inplace_convert_inline_code_to_backticks,
                 formatting.inplace_convert_strong_to_stars,
                 lambda soup: formatting.inplace_convert_internal_links_to_links(
                     soup, os.path.dirname(SUBMITS_URL), "std.std-ref"
                 ),
-                formatting.inplace_convert_code_to_code,
+                formatting.inplace_convert_code_block_to_code_block,
             ]:
                 converter(description)
 
