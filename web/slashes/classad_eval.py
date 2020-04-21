@@ -71,7 +71,7 @@ RE_PARTS = re.compile(r"'(.*?)'")
 
 def format_result(result: str):
     """Collapse newlines into spaces."""
-    return " ".join(s.strip() for s in str(result).splitlines())
+    return html.escape(" ".join(s.strip() for s in str(result).splitlines()))
 
 
 def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
