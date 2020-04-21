@@ -44,14 +44,14 @@ def generate_classad_eval_reply(user: str, text: str):
         current_app.logger.exception(
             f"Failed to evaluate an expression (ad: {repr(ad)}, expressions: {[exprs]}): {e}"
         )
-        return f"Failed to evaluate an expression: {e}"
+        return html.escape(f"Failed to evaluate an expression: {e}", quote=False)
 
     prefix = f"<@{user}> asked me to evaluate {'a ' if len(exprs) == 1 else ''}ClassAd expression{formatting.plural(exprs)}"
     if len(ad) != 0:
         msg_lines = [
             f"{prefix} in the context of this ad:",
             "```",
-            *textwrap.dedent(str(ad)).strip().splitlines(),
+            *textwrap.dedent(html.escape(str(ad), quote=False)).strip().splitlines(),
             "```",
             f"Expression{formatting.plural(results)}:",
         ]
@@ -71,7 +71,9 @@ RE_PARTS = re.compile(r"'(.*?)'")
 
 def format_result(result: str):
     """Collapse newlines into spaces."""
-    return html.escape(" ".join(s.strip() for s in str(result).splitlines()))
+    return html.escape(
+        " ".join(s.strip() for s in str(result).splitlines()), quote=False
+    )
 
 
 def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
