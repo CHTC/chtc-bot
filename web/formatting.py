@@ -28,7 +28,7 @@ def link(url, text=None):
 
 def compress_whitespace(text):
     """Convert all whitespaces into a single space between words."""
-    return " ".join(text.split())
+    return " ".join(text.split()).replace("<br />", "\n")
 
 
 def inplace_convert_em_to_underscores(soup, selector="em"):
@@ -66,4 +66,4 @@ def inplace_convert_code_block_to_code_block(
 ):
     codes = soup.select(selector)
     for code in codes:
-        code.replace_with(f"```{code.text}```")
+        code.replace_with(f"```{code.text}```".replace("\n", "<br />"))
