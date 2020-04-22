@@ -55,6 +55,11 @@ def submits_reply(
 def get_submits_description(soup, attr):
     try:
         start = soup.find("div", id="submit-description-file-commands")
+
+        # No, we can't find_all_next("dt") and pass this regex to string,
+        # because some of our dt tags have children, and "text" isn't a
+        # keyword argument for some insane reason (it gets interpreted
+        # as an attribute search).
         expr = re.compile(f"^{attr}( |$)", re.I)
         def text_matches(tag):
             return tag.name == "dt" and expr.search(tag.text)
