@@ -55,8 +55,12 @@ def submits_reply(
 def get_submits_description(soup, attr):
     try:
         start = soup.find("div", id="submit-description-file-commands")
-        dts = start.find_all_next("dt", string=re.compile(f"^{attr} ", re.I))
+        expr = re.compile(f"^{attr}( |$)", re.I)
+        def text_matches(tag):
+            return tag.name == "dt" and expr.search(tag.text)
+        dts = start.find_all_next(text_matches);
 
+        whole_description = None
         for dt in dts:
             description = dt.find_next("dd")
 
@@ -77,10 +81,22 @@ def get_submits_description(soup, attr):
                     replacement += f"\u2022 {li.text}<br>"
                 list.replace_with(replacement)
 
+            for list in description.find_all("ul"):
+                replacement = "<br>"
+                for li in list.select("ul > li"):
+                    replacement += f"\u2022 {li.text}<br>"
+                list.replace_with(replacement)
+
             text_description = formatting.compress_whitespace(description.text)
             text_description = text_description.replace( "<br>", "\n>" )
-            return f"{formatting.bold(dt.text)}\n>{text_description}"
-        return None
+
+            result = f"{formatting.bold(dt.text)}\n>{text_description}"
+            if whole_description is None:
+                whole_description = result
+            else:
+                whole_description += f"\n{result}"
+
+        return whole_description
 
     except Exception as e:
         current_app.logger.exception(f"Error while trying to find job attr {attr}: {e}")
