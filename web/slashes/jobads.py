@@ -69,6 +69,7 @@ def get_attrs_description(soup, attr):
                     lambda soup: formatting.inplace_convert_internal_links_to_links(
                         soup, os.path.dirname(ATTRS_URL), "doc"
                     ),
+                    formatting.inplace_convert_code_block_to_code_block,
                 ]:
                     converter(description)
 

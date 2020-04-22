@@ -61,6 +61,7 @@ def get_knob_description(knobs_page_soup, knob):
             lambda soup: formatting.inplace_convert_internal_links_to_links(
                 soup, KNOBS_URL, "std.std-ref"
             ),
+            formatting.inplace_convert_code_block_to_code_block,
         ]:
             converter(description)
         text_description = formatting.compress_whitespace(description.text)
