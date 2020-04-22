@@ -72,7 +72,7 @@ def get_submits_description(soup, attr):
                 converter(description)
 
             for list in description.find_all("ol"):
-                replacement = "<br />"
+                replacement = "<br>"
                 for li in list.select("ol > li"):
                     replacement += f"\u2022 {li.text}<br>"
                 list.replace_with(replacement)
