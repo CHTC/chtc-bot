@@ -74,11 +74,11 @@ def get_submits_description(soup, attr):
             for list in description.find_all("ol"):
                 replacement = "<br />"
                 for li in list.select("ol > li"):
-                    replacement += f"\u2022 {li.text}<br />"
+                    replacement += f"\u2022 {li.text}<br>"
                 list.replace_with(replacement)
 
             text_description = formatting.compress_whitespace(description.text)
-            # text_description = text_description.replace( "<br />", "\n" )
+            text_description = text_description.replace( "<br>", "\n>" )
             return f"{formatting.bold(dt.text)}\n>{text_description}"
         return None
 
