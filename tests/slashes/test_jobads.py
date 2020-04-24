@@ -79,9 +79,7 @@ def test_get_attrs_description(knob, expected):
     assert jobads.get_attrs_description(ATTRS_SOUP, knob) == expected
 
 
-@pytest.mark.parametrize(
-    "memory", [ False, True ]
-)
+@pytest.mark.parametrize("memory", [False, True])
 def test_handle_jobads_end_to_end(mocker, client, memory):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = ATTRS_HTML
@@ -112,4 +110,3 @@ def test_handle_jobads_end_to_end(mocker, client, memory):
         assert "AllRemoteHosts" not in msg
     else:
         assert mock.call_count == 0
-

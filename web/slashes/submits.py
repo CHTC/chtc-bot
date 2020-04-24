@@ -13,6 +13,7 @@ from ..utils import ForgetfulDict
 # ...
 recently_linked_cache = ForgetfulDict(memory_time=300)
 
+
 def handle_submits():
     submits = []
     skipped_submits = []
@@ -129,5 +130,7 @@ def get_submits_description(soup, submit):
         return whole_description
 
     except Exception as e:
-        current_app.logger.exception(f"Error while trying to find submit file command {submit}: {e}")
+        current_app.logger.exception(
+            f"Error while trying to find submit file command {submit}: {e}"
+        )
         return None

@@ -80,9 +80,7 @@ def test_get_knob_description(knob, expected):
     assert knobs.get_knob_description(KNOB_SOUP, knob) == expected
 
 
-@pytest.mark.parametrize(
-    "memory", [ False, True ]
-)
+@pytest.mark.parametrize("memory", [False, True])
 def test_handle_knobs_end_to_end(mocker, client, memory):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = KNOB_HTML

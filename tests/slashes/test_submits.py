@@ -260,9 +260,7 @@ def test_get_submits_description(submit, expected):
     assert submits.get_submits_description(SUBMITS_SOUP, submit) == expected
 
 
-@pytest.mark.parametrize(
-    "memory", [ False, True ]
-)
+@pytest.mark.parametrize("memory", [False, True])
 def test_handle_submits_end_to_end(mocker, client, memory):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = SUBMITS_HTML
