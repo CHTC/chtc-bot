@@ -24,7 +24,7 @@ def handle_knobs():
 
     if len(knobs) == 0:
         return (
-            f"Looked for knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in skipped_knobs)} recently",
+            f"Looked for knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in skipped_knobs)} recently, skipping",
             200,
         )
 
