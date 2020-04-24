@@ -13,18 +13,31 @@ recently_linked_cache = ForgetfulDict(memory_time=300)
 
 def handle_knobs():
     knobs = []
+    skipped_knobs = []
     requested_knobs = html.unescape(request.form.get("text")).upper().split(" ")
     for knob in requested_knobs:
         if knob not in recently_linked_cache:
             recently_linked_cache[knob] = True
             knobs.append(knob)
+        else:
+            skipped_knobs.append(knob)
+
+    if len(knobs) == 0:
+        return (
+            f"Looked for knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in knobs)} recently",
+            200,
+        )
 
     user = request.form.get("user_id")
     channel = request.form.get("channel_id")
     executor.submit(knobs_reply, channel, user, knobs)
 
+    message = f"Looking for knob{formatting.plural(knobs)} {', '.join(formatting.bold(k) for k in knobs)}"
+    if len(skipped_knobs) == 0:
+        message += ", skipping recently-viewed knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in skipped_knobs)}"
+
     return (
-        f"Looking for knob{formatting.plural(knobs)} {', '.join(formatting.bold(k) for k in knobs)}",
+        message,
         200,
     )
 
