@@ -29,6 +29,9 @@ class ForgetfulDict:
             self._memory[key] = now
         self._cache[key] = value
 
+    def __contains__(self, key):
+        return key in self._cache
+
     def _cleanup(self, now: float):
         if self._last_cleanup + self.memory_time > now:
             return

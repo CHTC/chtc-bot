@@ -12,8 +12,8 @@ from ..utils import ForgetfulDict
 recently_linked_cache = ForgetfulDict(memory_time=300)
 
 def handle_knobs():
-    knobs = ()
-    request_knobs = html.unescape(request.form.get("text")).upper().split(" ")
+    knobs = []
+    requested_knobs = html.unescape(request.form.get("text")).upper().split(" ")
     for knob in requested_knobs:
         if knob not in recently_linked_cache:
             recently_linked_cache[knob] = True
