@@ -8,16 +8,39 @@ from flask import current_app, request
 from ..executor import executor
 from .. import http, slack, formatting, utils
 
+from ..utils import ForgetfulDict
+
+# ...
+recently_linked_cache = ForgetfulDict(memory_time=300)
 
 def handle_submits():
-    channel = request.form.get("channel_id")
-    submits = html.unescape(request.form.get("text")).split(" ")
+    submits = []
+    skipped_submits = []
+    requested_submits = html.unescape(request.form.get("text")).split(" ")
+
+    for submit in requested_submits:
+        if submit not in recently_linked_cache:
+            recently_linked_cache[submit] = True
+            submits.append(submit)
+        else:
+            skipped_submits.append(submit)
+
+    if len(submits) == 0:
+        return (
+            f"Looked for submit file command{formatting.plural(submits)} {','.join(formatting.bold(k) for k in skipped_submits)} recently, skipping",
+            200,
+        )
+
     user = request.form.get("user_id")
+    channel = request.form.get("channel_id")
 
     executor.submit(submits_reply, channel, user, submits)
 
+    message = f"Looking for submit file command{formatting.plural(submits)} {', '.join(formatting.bold(s) for s in submits)}"
+    if len(skipped_submits) != 0:
+        message += f", skipping recently-viewed submit file command{formatting.plural(submits)} {', '.join(formatting.bold(k) for k in skipped_submits)}"
     return (
-        f"Looking for submit file command{formatting.plural(submits)} {', '.join(formatting.bold(s) for s in submits)}",
+        message,
         200,
     )
 
@@ -52,7 +75,7 @@ def submits_reply(
     slack.post_message(channel=channel, text=msg)
 
 
-def get_submits_description(soup, attr):
+def get_submits_description(soup, submit):
     try:
         start = soup.find("div", id="submit-description-file-commands")
 
@@ -60,7 +83,7 @@ def get_submits_description(soup, attr):
         # because some of our dt tags have children, and "text" isn't a
         # keyword argument for some insane reason (it gets interpreted
         # as an attribute search).
-        expr = re.compile(f"^{attr}( |$)", re.I)
+        expr = re.compile(f"^{submit}( |$)", re.I)
         def text_matches(tag):
             return tag.name == "dt" and expr.search(tag.text)
         dts = start.find_all_next(text_matches);
@@ -104,5 +127,5 @@ def get_submits_description(soup, attr):
         return whole_description
 
     except Exception as e:
-        current_app.logger.exception(f"Error while trying to find job attr {attr}: {e}")
+        current_app.logger.exception(f"Error while trying to find submit file command {submit}: {e}")
         return None

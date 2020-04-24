@@ -79,7 +79,10 @@ def test_get_attrs_description(knob, expected):
     assert jobads.get_attrs_description(ATTRS_SOUP, knob) == expected
 
 
-def test_handle_jobads_end_to_end(mocker, client):
+@pytest.mark.parametrize(
+    "memory", [ False, True ]
+)
+def test_handle_jobads_end_to_end(mocker, client, memory):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = ATTRS_HTML
 
@@ -91,19 +94,22 @@ def test_handle_jobads_end_to_end(mocker, client):
     )
 
     # let the executor run
+    # Strictly speaking, this should (a) depend on the memory_time value
+    # and (b) poll until the executor signals that it has run.
     time.sleep(0.1)
 
-    assert mock.call_count == 1
+    if not memory:
+        assert mock.call_count == 1
+        channel = mock.call_args[1]["channel"]
+        assert channel == "1234"
+        msg = mock.call_args[1]["text"]
 
-    channel = mock.call_args[1]["channel"]
+        # make a few assertions about the output message,
+        # but without holding on too tight
+        assert "<@5678>" in msg
+        assert "AcctGroupUser" in msg
+        assert "user name associated" in msg
+        assert "AllRemoteHosts" not in msg
+    else:
+        assert mock.call_count == 0
 
-    assert channel == "1234"
-
-    msg = mock.call_args[1]["text"]
-
-    # make a few assertions about the output message,
-    # but without holding on too tight
-    assert "<@5678>" in msg
-    assert "AcctGroupUser" in msg
-    assert "user name associated" in msg
-    assert "AllRemoteHosts" not in msg
