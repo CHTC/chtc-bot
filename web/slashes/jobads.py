@@ -28,7 +28,7 @@ def handle_jobads():
 
     if len(attrs) == 0:
         return(
-            f"Looked for job ad attribute{format.plural(skipped_attrs)} {', '.join(formatting.bold(k) for k in skipped_attrs)} recently, skipping",
+            f"Looked for job ad attribute{formatting.plural(skipped_attrs)} {', '.join(formatting.bold(k) for k in skipped_attrs)} recently, skipping",
             200,
         )
 
