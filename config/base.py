@@ -7,6 +7,7 @@ from web.events import linkers
 
 DEBUG = False
 TESTING = False
+PRODUCTION = False
 
 EXECUTOR_TYPE = "thread"
 EXECUTOR_MAX_WORKERS = None  # let it decide
@@ -15,8 +16,8 @@ EXECUTOR_PROPAGATE_EXCEPTIONS = True
 # The user ID for this bot
 BOT_USER_ID = "U011WEDH24U"
 
-# The channel ID for the testing channel on the CHTC slack
-TESTING_CHANNEL = "G011PN92WTV"
+# The channel ID for the dev channel on the CHTC slack
+DEV_CHANNEL = "G011PN92WTV"
 
 five_minutes = datetime.timedelta(minutes=5).total_seconds()
 
