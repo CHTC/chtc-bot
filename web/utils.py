@@ -30,6 +30,8 @@ class ForgetfulDict:
         self._cache[key] = value
 
     def __contains__(self, key):
+        now = time.monotonic()
+        self._cleanup(now)
         return key in self._cache
 
     def _cleanup(self, now: float):
