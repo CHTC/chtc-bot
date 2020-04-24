@@ -84,9 +84,11 @@ def get_submits_description(soup, submit):
         # keyword argument for some insane reason (it gets interpreted
         # as an attribute search).
         expr = re.compile(f"^{submit}( |$)", re.I)
+
         def text_matches(tag):
             return tag.name == "dt" and expr.search(tag.text)
-        dts = start.find_all_next(text_matches);
+
+        dts = start.find_all_next(text_matches)
 
         whole_description = None
         for dt in dts:
@@ -116,7 +118,7 @@ def get_submits_description(soup, submit):
                 list.replace_with(replacement)
 
             text_description = formatting.compress_whitespace(description.text)
-            text_description = text_description.replace( "<br>", "\n>" )
+            text_description = text_description.replace("<br>", "\n>")
 
             result = f"{formatting.bold(dt.text)}\n>{text_description}"
             if whole_description is None:

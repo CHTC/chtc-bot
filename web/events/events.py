@@ -1,6 +1,10 @@
+import traceback
+
 from flask import current_app
 
 from ..executor import executor
+from .. import slack
+
 
 EVENT_HANDLERS = []
 
@@ -38,4 +42,10 @@ def _handle_message(event_data):
             handler.handle(message)
         except Exception as e:
             current_app.logger.exception(f"Uncaught exception in {handler}: {e}")
+
+            executor.submit(
+                slack.notify_error,
+                f"Uncaught exception in `{handler}`: `{e}`\n```\n{traceback.format_exc()}\n```",
+            )
+
             pass

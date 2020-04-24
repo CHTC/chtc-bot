@@ -14,6 +14,7 @@ from ..utils import ForgetfulDict
 # ...
 recently_linked_cache = ForgetfulDict(memory_time=300)
 
+
 def handle_jobads():
     attrs = []
     skipped_attrs = []
@@ -27,7 +28,7 @@ def handle_jobads():
             skipped_attrs.append(attr)
 
     if len(attrs) == 0:
-        return(
+        return (
             f"Looked for job ad attribute{formatting.plural(skipped_attrs)} {', '.join(formatting.bold(k) for k in skipped_attrs)} recently, skipping",
             200,
         )

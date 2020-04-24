@@ -11,6 +11,7 @@ from ..utils import ForgetfulDict
 # ...
 recently_linked_cache = ForgetfulDict(memory_time=300)
 
+
 def handle_knobs():
     knobs = []
     skipped_knobs = []
