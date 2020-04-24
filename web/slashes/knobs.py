@@ -6,12 +6,21 @@ from flask import current_app, request
 from ..executor import executor
 from .. import http, slack, formatting, utils
 
+from ..utils import ForgetfulDict
+
+# ...
+recently_linked_cache = ForgetfulDict(memory_time=300)
 
 def handle_knobs():
-    channel = request.form.get("channel_id")
-    knobs = html.unescape(request.form.get("text")).upper().split(" ")
-    user = request.form.get("user_id")
+    knobs = ()
+    request_knobs = html.unescape(request.form.get("text")).upper().split(" ")
+    for knob in requested_knobs:
+        if knob not in recently_linked_cache:
+            recently_linked_cache[knob] = True
+            knobs.append(knob)
 
+    user = request.form.get("user_id")
+    channel = request.form.get("channel_id")
     executor.submit(knobs_reply, channel, user, knobs)
 
     return (
