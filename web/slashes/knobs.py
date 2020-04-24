@@ -24,7 +24,7 @@ def handle_knobs():
 
     if len(knobs) == 0:
         return (
-            f"Looked for knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in knobs)} recently",
+            f"Looked for knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in skipped_knobs)} recently",
             200,
         )
 
@@ -33,8 +33,8 @@ def handle_knobs():
     executor.submit(knobs_reply, channel, user, knobs)
 
     message = f"Looking for knob{formatting.plural(knobs)} {', '.join(formatting.bold(k) for k in knobs)}"
-    if len(skipped_knobs) == 0:
-        message += ", skipping recently-viewed knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in skipped_knobs)}"
+    if len(skipped_knobs) != 0:
+        message += f", skipping recently-viewed knob{formatting.plural(skipped_knobs)} {', '.join(formatting.bold(k) for k in skipped_knobs)}"
 
     return (
         message,
