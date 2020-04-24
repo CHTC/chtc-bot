@@ -9,18 +9,41 @@ from flask import current_app, request
 from ..executor import executor
 from .. import http, slack, formatting, utils
 
+from ..utils import ForgetfulDict
+
+# ...
+recently_linked_cache = ForgetfulDict(memory_time=300)
 
 def handle_jobads():
-    channel = request.form.get("channel_id")
-    attrs = html.unescape(request.form.get("text")).split(" ")
+    attrs = []
+    skipped_attrs = []
+    requested_attrs = html.unescape(request.form.get("text")).split(" ")
+
+    for attr in requested_attrs:
+        if attr not in recently_linked_cache:
+            recently_linked_cache[attr] = True
+            attrs.append(attr)
+        else:
+            skipped_attrs.append(attr)
+
+    if len(attrs) == 0:
+        return(
+            f"Looked for job ad attribute{format.plural(skipped_attrs)} {', '.join(formatting.bold(k) for k in skipped_attrs)} recently, skipping",
+            200,
+        )
+
     user = request.form.get("user_id")
+    channel = request.form.get("channel_id")
 
     executor.submit(
         attrs_reply, channel, user, attrs,
     )
 
+    message = f"Looking for job ad attribute{formatting.plural(attrs)} {', '.join(formatting.bold(a) for a in attrs)}"
+    if len(skipped_attrs) != 0:
+        message += f", skipping recently-viewed job ad attributes{formatting.plural(skipped_attrs)} {', '.join(formatting.bold(k) for k in skipped_attrs)}"
     return (
-        f"Looking for job ad attribute{formatting.plural(attrs)} {', '.join(formatting.bold(a) for a in attrs)}",
+        message,
         200,
     )
 
