@@ -26,10 +26,7 @@ class RegexMessageHandler(MessageHandler):
         if len(matches) == 0:
             return
 
-        try:
-            self.handle_message(message, matches)
-        except Exception as e:
-            print(e)
+        self.handle_message(message, matches)
 
     def get_matches(self, message):
         matches = self.regex.findall(message["text"])
