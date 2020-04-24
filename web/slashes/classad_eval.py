@@ -77,10 +77,15 @@ def format_result(result: str):
 
 
 def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
-    parts = RE_PARTS.findall(text)
+    ad_text, *exprs_text = RE_PARTS.findall(text)
 
-    ad = classad.ClassAd(parts[0])
-    exprs = [classad.ExprTree(s) for s in parts[1:]]
+    try:
+        ad = classad.ClassAd(ad_text)
+    except SyntaxError:
+        # it doesn't look like an ad... maybe they missed the wrapping braces?
+        ad = classad.ClassAd(f"[{ad_text}]")
+
+    exprs = [classad.ExprTree(s) for s in exprs_text]
 
     return ad, exprs
 
