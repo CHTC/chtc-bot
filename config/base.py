@@ -3,6 +3,7 @@ import datetime
 
 import web.slashes as slashes
 from web.events import linkers
+from web.slashes import commands
 
 
 DEBUG = False
@@ -43,4 +44,6 @@ SLASH_COMMANDS = {
     "classad_eval": slashes.handle_classad_eval,
     "jobads": slashes.handle_jobads,
     "submits": slashes.handle_submits,
+    # @JoshK: why does this work?
+    "new_knobs": commands.KnobsCommandHandler(relink_timeout=five_minutes).handle,
 }

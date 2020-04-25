@@ -31,9 +31,18 @@ from web.slashes import classad_eval
         ),
         ("'[]' '1 + 1'", (classad.ClassAd(), [classad.ExprTree("1 + 1")])),
         ("'' '1 + 1'", (classad.ClassAd(), [classad.ExprTree("1 + 1")])),
-        ("'foo = 1' 'foo + 1'", (classad.ClassAd({"foo": 1}), [classad.ExprTree("foo + 1")])),
-        ("'foo = 1; bar = 2' 'foo + 1'", (classad.ClassAd({"foo": 1, "bar": 2}), [classad.ExprTree("foo + 1")])),
-        ("'[ foo = 1; bar = 2] ' 'foo + 1'", (classad.ClassAd({"foo": 1, "bar": 2}), [classad.ExprTree("foo + 1")])),
+        (
+            "'foo = 1' 'foo + 1'",
+            (classad.ClassAd({"foo": 1}), [classad.ExprTree("foo + 1")]),
+        ),
+        (
+            "'foo = 1; bar = 2' 'foo + 1'",
+            (classad.ClassAd({"foo": 1, "bar": 2}), [classad.ExprTree("foo + 1")]),
+        ),
+        (
+            "'[ foo = 1; bar = 2] ' 'foo + 1'",
+            (classad.ClassAd({"foo": 1, "bar": 2}), [classad.ExprTree("foo + 1")]),
+        ),
     ],
 )
 def test_parsing(text, expected):
