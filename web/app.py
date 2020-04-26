@@ -31,6 +31,11 @@ def create_app(config):
 
         # add routes for slash commands as specified in base.py
         for command, command_handler in app.config["SLASH_COMMANDS"].items():
-            app.route(f"/slash/{command}", methods=["POST"])(command_handler)
+            app.add_url_rule(
+                f"/slash/{command}",
+                methods=["POST"],
+                endpoint=command,
+                view_func=command_handler,
+            )
 
         return app
