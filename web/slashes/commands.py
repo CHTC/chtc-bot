@@ -10,6 +10,7 @@ from .. import http, slack, formatting, utils
 from ..utils import ForgetfulDict
 
 import html
+import os
 
 
 class CommandHandler(metaclass=abc.ABCMeta):
@@ -24,14 +25,17 @@ class WebScrapingCommandHandler(CommandHandler):
 
         self.recently_linked_cache = ForgetfulDict(memory_time=relink_timeout)
 
+    # def __call__(self):
+    #     return self.handle()
+
     def handle(self):
         args = []
         skipped_args = []
-        requested_args = html.unescape(request.form.get("text")).upper().split(" ")
+        requested_args = html.unescape(request.form.get("text")).split(" ")
 
         for arg in requested_args:
-            if arg not in self.recently_linked_cache:
-                self.recently_linked_cache[arg] = True
+            if arg.upper() not in self.recently_linked_cache:
+                self.recently_linked_cache[arg.upper()] = True
                 args.append(arg)
             else:
                 skipped_args.append(arg)
@@ -46,7 +50,6 @@ class WebScrapingCommandHandler(CommandHandler):
 
         user = request.form.get("user_id")
         channel = request.form.get("channel_id")
-        # @JoshK: how does thi work without a self between reply and channel?
         executor.submit(self.reply, channel, user, args)
 
         message = f"Looking for {self.word}{formatting.plural(skipped_args)}"
@@ -94,6 +97,7 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
     def get_description(self, page_soup, arg):
         try:
             header = page_soup.find("span", id=arg)
+
             description = header.parent.find_next("dd")
             for converter in [
                 formatting.inplace_convert_em_to_underscores,
@@ -105,9 +109,51 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
                 formatting.inplace_convert_code_block_to_code_block,
             ]:
                 converter(description)
-            text_description = formatting.compress_whitespace(description.text)
 
+            text_description = formatting.compress_whitespace(description.text)
             return f"{formatting.bold(arg)}\n>{text_description}"
+        except Exception as e:
+            current_app.logger.exception(
+                f"Error while trying to find {self.word} {arg}: {e}"
+            )
+            return None
+
+
+class JobAdsCommandHandler(WebScrapingCommandHandler):
+    def __init__(self, *, relink_timeout):
+        super().__init__(relink_timeout=relink_timeout)
+
+        # @JoshK: Should these be arguments to the superclass constructor?
+        self.url = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
+        self.word = "job ad attribute"
+
+        self.__name__ = "JobAdsCommandHandler.handle"
+
+    def get_description(self, page_soup, arg):
+        x = JobAdsCommandHandler(relink_timeout=300)
+
+        try:
+            # This can't be the efficient way to do this.
+            spans = page_soup.select(
+                "dt > code.docutils.literal.notranslate > span.pre"
+            )
+
+            for span in spans:
+                if span.text.lower() == arg.lower():
+                    description = span.parent.parent.find_next("dd")
+                    for converter in [
+                        formatting.inplace_convert_em_to_underscores,
+                        formatting.inplace_convert_inline_code_to_backticks,
+                        formatting.inplace_convert_strong_to_stars,
+                        lambda soup: formatting.inplace_convert_internal_links_to_links(
+                            soup, os.path.dirname(self.url), "doc"
+                        ),
+                        formatting.inplace_convert_code_block_to_code_block,
+                    ]:
+                        converter(description)
+
+            text_description = formatting.compress_whitespace(description.text)
+            return f"{formatting.bold(span.text)}\n>{text_description}"
         except Exception as e:
             current_app.logger.exception(
                 f"Error while trying to find {self.word} {arg}: {e}"
