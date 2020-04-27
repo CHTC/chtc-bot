@@ -11,6 +11,7 @@ from ..utils import ForgetfulDict
 
 import html
 import os
+import re
 
 
 class CommandHandler(metaclass=abc.ABCMeta):
@@ -127,11 +128,7 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
         self.url = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
         self.word = "job ad attribute"
 
-        self.__name__ = "JobAdsCommandHandler.handle"
-
     def get_description(self, page_soup, arg):
-        x = JobAdsCommandHandler(relink_timeout=300)
-
         try:
             # This can't be the efficient way to do this.
             spans = page_soup.select(
@@ -154,6 +151,73 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
 
             text_description = formatting.compress_whitespace(description.text)
             return f"{formatting.bold(span.text)}\n>{text_description}"
+        except Exception as e:
+            current_app.logger.exception(
+                f"Error while trying to find {self.word} {arg}: {e}"
+            )
+            return None
+
+class SubmitsCommandHandler(WebScrapingCommandHandler):
+    def __init__(self, *, relink_timeout):
+        super().__init__(relink_timeout=relink_timeout)
+
+        # @JoshK: Should these be arguments to the superclass constructor?
+        self.url = "https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html"
+        self.word = "submit file command"
+
+    def get_description(self, page_soup, arg):
+        try:
+            start = page_soup.find("div", id="submit-description-file-commands")
+
+            # No, we can't find_all_next("dt") and pass this regex to string,
+            # because some of our dt tags have children, and "text" isn't a
+            # keyword argument for some insane reason (it gets interpreted
+            # as an attribute search).
+            expr = re.compile(f"^{arg}( |$)", re.I)
+
+            # ... lambda?
+            def text_matches(tag):
+                return tag.name == "dt" and expr.search(tag.text)
+
+            dts = start.find_all_next(text_matches)
+
+            whole_description = None
+            for dt in dts:
+                description = dt.find_next("dd")
+                for converter in [
+                    formatting.inplace_convert_em_to_underscores,
+                    formatting.inplace_convert_inline_code_to_backticks,
+                    formatting.inplace_convert_strong_to_stars,
+                    lambda soup: formatting.inplace_convert_internal_links_to_links(
+                        soup, os.path.dirname(self.url), "std.std-ref"
+                    ),
+                    formatting.inplace_convert_code_block_to_code_block,
+                ]:
+                    converter(description)
+
+                for list in description.find_all("ol"):
+                    replacement = "<br>"
+                    for li in list.select("ol > li"):
+                        replacement += f"\u2022 {li.text}<br>"
+                    list.replace_with(replacement)
+
+                for list in description.find_all("ul"):
+                    replacement = "<br>"
+                    for li in list.select("ul > li"):
+                        replacement += f"\u2022 {li.text}<br>"
+                    list.replace_with(replacement)
+
+                text_description = formatting.compress_whitespace(description.text)
+                text_description = text_description.replace("<br>", "\n>")
+
+                result = f"{formatting.bold(dt.text)}\n>{text_description}"
+                if whole_description is None:
+                    whole_description = result
+                else:
+                    whole_description += f"\n{result}"
+
+            return whole_description
+
         except Exception as e:
             current_app.logger.exception(
                 f"Error while trying to find {self.word} {arg}: {e}"

@@ -46,7 +46,7 @@ SLASH_COMMANDS = {
     "jobads": slashes.handle_jobads,
     "submits": slashes.handle_submits,
 
-    # @JoshK: bound function reference vs. making the object callable?
     "new_knobs": commands.KnobsCommandHandler(relink_timeout=five_minutes).handle,
     "new_jobads": commands.JobAdsCommandHandler(relink_timeout=five_minutes).handle,
+    "new_submits": commands.SubmitsCommandHandler(relink_timeout=five_minutes).handle,
 }
