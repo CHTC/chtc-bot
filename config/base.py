@@ -1,10 +1,8 @@
 import re
 import datetime
 
-from web.events import linkers
-from web.slashes import scrapers
-from web.slashes import classad_eval
-
+import web.events as events
+import web.slashes as slashes
 
 DEBUG = False
 TESTING = False
@@ -23,15 +21,15 @@ DEV_CHANNEL = "G011PN92WTV"
 five_minutes = datetime.timedelta(minutes=5).total_seconds()
 
 MESSAGE_HANDLERS = [
-    linkers.FlightworthyTicketLinker(relink_timeout=five_minutes),
-    linkers.RTTicketLinker(relink_timeout=five_minutes),
-    linkers.TicketLinker(
+    events.FlightworthyTicketLinker(relink_timeout=five_minutes),
+    events.RTTicketLinker(relink_timeout=five_minutes),
+    events.TicketLinker(
         regex=re.compile(r"bot-issue#(\d+)", re.IGNORECASE),
         url="https://github.com/JoshKarpel/chtc-bot/issues/{}",
         prefix="bot",
         relink_timeout=five_minutes,
     ),
-    linkers.TicketLinker(
+    events.TicketLinker(
         regex=re.compile(r"bot-pr#(\d+)", re.IGNORECASE),
         url="https://github.com/JoshKarpel/chtc-bot/pull/{}",
         prefix="bot",
@@ -41,8 +39,8 @@ MESSAGE_HANDLERS = [
 
 
 SLASH_COMMANDS = {
-    "knobs": scrapers.KnobsCommandHandler(relink_timeout=five_minutes),
-    "jobads": scrapers.JobAdsCommandHandler(relink_timeout=five_minutes),
-    "submits": scrapers.SubmitsCommandHandler(relink_timeout=five_minutes),
-    "classad_eval": classad_eval.ClassadEvalCommandHandler(),
+    "knobs": slashes.KnobsCommandHandler(relink_timeout=five_minutes),
+    "jobads": slashes.JobAdsCommandHandler(relink_timeout=five_minutes),
+    "submits": slashes.SubmitsCommandHandler(relink_timeout=five_minutes),
+    "classad_eval": slashes.ClassadEvalCommandHandler(),
 }
