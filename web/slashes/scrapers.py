@@ -10,6 +10,7 @@ from ..executor import executor
 from ..utils import ForgetfulDict
 from .. import http, slack, formatting, utils
 
+
 class WebScrapingCommandHandler(commands.CommandHandler):
     def __init__(self, *, relink_timeout):
         super().__init__()
@@ -148,12 +149,15 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
             )
             return None
 
+
 class SubmitsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, relink_timeout):
         super().__init__(relink_timeout=relink_timeout)
 
         # @JoshK: Should these be arguments to the superclass constructor?
-        self.url = "https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html"
+        self.url = (
+            "https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html"
+        )
         self.word = "submit file command"
 
     def get_description(self, page_soup, arg):

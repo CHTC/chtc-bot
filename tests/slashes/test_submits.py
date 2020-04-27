@@ -5,17 +5,17 @@ import textwrap
 
 import bs4
 
+
 @pytest.fixture
 def sch():
     from web.slashes import scrapers
 
     return scrapers.SubmitsCommandHandler(relink_timeout=300)
 
+
 def test_get_description_returns_none_if_it_fails_to_find_the_submit(sch):
     assert (
-        sch.get_description(
-            bs4.BeautifulSoup("", features="html.parser"), "foo"
-        )
+        sch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
         is None
     )
 

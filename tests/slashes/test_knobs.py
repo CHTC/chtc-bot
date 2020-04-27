@@ -5,6 +5,7 @@ import textwrap
 
 import bs4
 
+
 @pytest.fixture
 def kch():
     from web.slashes import scrapers
@@ -14,9 +15,7 @@ def kch():
 
 def test_get_description_returns_none_if_it_fails_to_find_the_knob(kch):
     assert (
-        kch.get_description(
-            bs4.BeautifulSoup("", features="html.parser"), "foo"
-        )
+        kch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
         is None
     )
 
