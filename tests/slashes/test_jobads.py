@@ -7,9 +7,9 @@ import bs4
 
 @pytest.fixture
 def jch():
-    from web.slashes import commands
+    from web.slashes import scrapers
 
-    return commands.JobAdsCommandHandler(relink_timeout=300)
+    return scrapers.JobAdsCommandHandler(relink_timeout=300)
 
 def test_get_description_returns_none_if_it_fails_to_find_the_attr(jch):
     assert (

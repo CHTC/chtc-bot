@@ -3,7 +3,7 @@ import datetime
 
 import web.slashes as slashes
 from web.events import linkers
-from web.slashes import commands
+from web.slashes import scrapers
 
 
 DEBUG = False
@@ -42,7 +42,7 @@ MESSAGE_HANDLERS = [
 
 SLASH_COMMANDS = {
     "classad_eval": slashes.handle_classad_eval,
-    "knobs": commands.KnobsCommandHandler(relink_timeout=five_minutes).handle,
-    "jobads": commands.JobAdsCommandHandler(relink_timeout=five_minutes).handle,
-    "submits": commands.SubmitsCommandHandler(relink_timeout=five_minutes).handle,
+    "knobs": scrapers.KnobsCommandHandler(relink_timeout=five_minutes).handle,
+    "jobads": scrapers.JobAdsCommandHandler(relink_timeout=five_minutes).handle,
+    "submits": scrapers.SubmitsCommandHandler(relink_timeout=five_minutes).handle,
 }

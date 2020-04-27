@@ -7,9 +7,9 @@ import bs4
 
 @pytest.fixture
 def sch():
-    from web.slashes import commands
+    from web.slashes import scrapers
 
-    return commands.SubmitsCommandHandler(relink_timeout=300)
+    return scrapers.SubmitsCommandHandler(relink_timeout=300)
 
 def test_get_description_returns_none_if_it_fails_to_find_the_submit(sch):
     assert (
