@@ -25,11 +25,8 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         requested_args = html.unescape(request.form.get("text")).split(" ")
 
         for arg in requested_args:
-            if arg.upper() not in self.recently_linked_cache:
-                self.recently_linked_cache[arg.upper()] = [channel]
-                args.append(arg)
-            elif channel not in self.recently_linked_cache[arg.upper()]:
-                self.recently_linke_cache[arg.uppder()].append(channel)
+            if (arg.upper(), channel) not in self.recently_linked_cache:
+                self.recently_linked_cache[(arg.upper(), channel)] = True
                 args.append(arg)
             else:
                 skipped_args.append(arg)
