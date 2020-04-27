@@ -35,7 +35,7 @@ def create_app(config):
                 f"/slash/{command}",
                 methods=["POST"],
                 endpoint=command,
-                view_func=command_handler,
+                view_func=command_handler.handle,
             )
 
         return app

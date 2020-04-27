@@ -1,9 +1,9 @@
 import re
 import datetime
 
-import web.slashes as slashes
 from web.events import linkers
 from web.slashes import scrapers
+from web.slashes import classad_eval
 
 
 DEBUG = False
@@ -41,8 +41,8 @@ MESSAGE_HANDLERS = [
 
 
 SLASH_COMMANDS = {
-    "classad_eval": slashes.handle_classad_eval,
-    "knobs": scrapers.KnobsCommandHandler(relink_timeout=five_minutes).handle,
-    "jobads": scrapers.JobAdsCommandHandler(relink_timeout=five_minutes).handle,
-    "submits": scrapers.SubmitsCommandHandler(relink_timeout=five_minutes).handle,
+    "knobs": scrapers.KnobsCommandHandler(relink_timeout=five_minutes),
+    "jobads": scrapers.JobAdsCommandHandler(relink_timeout=five_minutes),
+    "submits": scrapers.SubmitsCommandHandler(relink_timeout=five_minutes),
+    "classad_eval": classad_eval.ClassadEvalCommandHandler(),
 }
