@@ -41,12 +41,8 @@ MESSAGE_HANDLERS = [
 
 
 SLASH_COMMANDS = {
-    "knobs": slashes.handle_knobs,
     "classad_eval": slashes.handle_classad_eval,
-    "jobads": slashes.handle_jobads,
-    "submits": slashes.handle_submits,
-
-    "new_knobs": commands.KnobsCommandHandler(relink_timeout=five_minutes).handle,
-    "new_jobads": commands.JobAdsCommandHandler(relink_timeout=five_minutes).handle,
-    "new_submits": commands.SubmitsCommandHandler(relink_timeout=five_minutes).handle,
+    "knobs": commands.KnobsCommandHandler(relink_timeout=five_minutes).handle,
+    "jobads": commands.JobAdsCommandHandler(relink_timeout=five_minutes).handle,
+    "submits": commands.SubmitsCommandHandler(relink_timeout=five_minutes).handle,
 }

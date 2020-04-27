@@ -5,12 +5,18 @@ import textwrap
 
 import bs4
 
-from web.slashes import knobs
+@pytest.fixture
+def kch():
+    from web.slashes import commands
+
+    return commands.KnobsCommandHandler(relink_timeout=300)
 
 
-def test_get_knob_description_returns_none_if_it_fails_to_find_the_knob():
+def test_get_description_returns_none_if_it_fails_to_find_the_knob(kch):
     assert (
-        knobs.get_knob_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
+        kch.get_description(
+            bs4.BeautifulSoup("", features="html.parser"), "foo"
+        )
         is None
     )
 
@@ -73,11 +79,11 @@ KNOB_SOUP = bs4.BeautifulSoup(KNOB_HTML, "html.parser")
         ("NOPE", None),
     ],
 )
-def test_get_knob_description(knob, expected):
+def test_get_knob_description(kch, knob, expected):
     # clean up the triple-quoted string
     expected = textwrap.dedent(expected).strip() if expected is not None else expected
 
-    assert knobs.get_knob_description(KNOB_SOUP, knob) == expected
+    assert kch.get_description(KNOB_SOUP, knob) == expected
 
 
 @pytest.mark.parametrize("memory", [False, True])

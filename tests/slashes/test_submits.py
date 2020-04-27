@@ -5,12 +5,15 @@ import textwrap
 
 import bs4
 
-from web.slashes import submits
+@pytest.fixture
+def sch():
+    from web.slashes import commands
 
+    return commands.SubmitsCommandHandler(relink_timeout=300)
 
-def test_get_submits_description_returns_none_if_it_fails_to_find_the_knob():
+def test_get_description_returns_none_if_it_fails_to_find_the_submit(sch):
     assert (
-        submits.get_submits_description(
+        sch.get_description(
             bs4.BeautifulSoup("", features="html.parser"), "foo"
         )
         is None
@@ -253,11 +256,11 @@ SUBMITS_SOUP = bs4.BeautifulSoup(SUBMITS_HTML, "html.parser")
         ("NOPE", None),
     ],
 )
-def test_get_submits_description(submit, expected):
+def test_get_description(sch, submit, expected):
     # clean up the triple-quoted string
     expected = textwrap.dedent(expected).strip() if expected is not None else expected
 
-    assert submits.get_submits_description(SUBMITS_SOUP, submit) == expected
+    assert sch.get_description(SUBMITS_SOUP, submit) == expected
 
 
 @pytest.mark.parametrize("memory", [False, True])

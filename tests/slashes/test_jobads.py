@@ -5,12 +5,15 @@ import textwrap
 
 import bs4
 
-from web.slashes import jobads
+@pytest.fixture
+def jch():
+    from web.slashes import commands
 
+    return commands.JobAdsCommandHandler(relink_timeout=300)
 
-def test_get_attrs_description_returns_none_if_it_fails_to_find_the_knob():
+def test_get_description_returns_none_if_it_fails_to_find_the_attr(jch):
     assert (
-        jobads.get_attrs_description(
+        jch.get_description(
             bs4.BeautifulSoup("", features="html.parser"), "foo"
         )
         is None
@@ -60,7 +63,7 @@ ATTRS_SOUP = bs4.BeautifulSoup(ATTRS_HTML, "html.parser")
 
 
 @pytest.mark.parametrize(
-    "knob, expected",
+    "attr, expected",
     [
         (
             "AcctGroupUser",
@@ -72,11 +75,11 @@ ATTRS_SOUP = bs4.BeautifulSoup(ATTRS_HTML, "html.parser")
         ("NOPE", None),
     ],
 )
-def test_get_attrs_description(knob, expected):
+def test_get_description(jch, attr, expected):
     # clean up the triple-quoted string
     expected = textwrap.dedent(expected).strip() if expected is not None else expected
 
-    assert jobads.get_attrs_description(ATTRS_SOUP, knob) == expected
+    assert jch.get_description(ATTRS_SOUP, attr) == expected
 
 
 @pytest.mark.parametrize("memory", [False, True])
