@@ -264,14 +264,15 @@ def test_get_description(sch, submit, expected):
 
 
 @pytest.mark.parametrize("memory", [False, True])
-def test_handle_submits_end_to_end(mocker, client, memory):
+@pytest.mark.parametrize("channel_id", ["1234", "4321"])
+def test_handle_submits_end_to_end(mocker, client, memory, channel_id):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = SUBMITS_HTML
 
     mock = mocker.patch("web.slack.post_message")
 
     client.post(
-        "/slash/submits", data=dict(channel_id="1234", user_id="5678", text="error"),
+        "/slash/submits", data=dict(channel_id=channel_id, user_id="5678", text="error"),
     )
 
     # let the executor run
@@ -282,7 +283,7 @@ def test_handle_submits_end_to_end(mocker, client, memory):
     if not memory:
         assert mock.call_count == 1
         channel = mock.call_args[1]["channel"]
-        assert channel == "1234"
+        assert channel == channel_id
         msg = mock.call_args[1]["text"]
 
         # make a few assertions about the output message,
