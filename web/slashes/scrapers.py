@@ -17,17 +17,19 @@ class WebScrapingCommandHandler(commands.CommandHandler):
 
         self.recently_linked_cache = ForgetfulDict(memory_time=relink_timeout)
 
-    # def __call__(self):
-    #     return self.handle()
-
     def handle(self):
+        channel = request.form.get("channel_id")
+
         args = []
         skipped_args = []
         requested_args = html.unescape(request.form.get("text")).split(" ")
 
         for arg in requested_args:
             if arg.upper() not in self.recently_linked_cache:
-                self.recently_linked_cache[arg.upper()] = True
+                self.recently_linked_cache[arg.upper()] = [channel]
+                args.append(arg)
+            elif channel not in self.recently_linked_cache[arg.upper()]:
+                self.recently_linke_cache[arg.uppder()].append(channel)
                 args.append(arg)
             else:
                 skipped_args.append(arg)
@@ -41,7 +43,6 @@ class WebScrapingCommandHandler(commands.CommandHandler):
             )
 
         user = request.form.get("user_id")
-        channel = request.form.get("channel_id")
         executor.submit(self.reply, channel, user, args)
 
         message = f"Looking for {self.word}{formatting.plural(skipped_args)}"
