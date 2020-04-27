@@ -149,8 +149,9 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
                     ]:
                         converter(description)
 
-            text_description = formatting.compress_whitespace(description.text)
-            return f"{formatting.bold(span.text)}\n>{text_description}"
+                    text_description = formatting.compress_whitespace(description.text)
+                    return f"{formatting.bold(span.text)}\n>{text_description}"
+            return None
         except Exception as e:
             current_app.logger.exception(
                 f"Error while trying to find {self.word} {arg}: {e}"
