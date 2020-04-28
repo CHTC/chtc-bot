@@ -12,8 +12,11 @@ from .. import http, slack, formatting, utils
 
 
 class WebScrapingCommandHandler(commands.CommandHandler):
-    def __init__(self, *, relink_timeout):
+    def __init__(self, *, relink_timeout, url, word):
         super().__init__()
+
+        self.url = url
+        self.word = word
 
         self.recently_linked_cache = ForgetfulDict(memory_time=relink_timeout)
 
@@ -79,11 +82,11 @@ class WebScrapingCommandHandler(commands.CommandHandler):
 
 class KnobsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, relink_timeout):
-        super().__init__(relink_timeout=relink_timeout)
-
-        # @JoshK: Should these be arguments to the superclass constructor?
-        self.url = "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
-        self.word = "knob"
+        super().__init__(
+            relink_timeout=relink_timeout,
+            url="https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html",
+            word="knob",
+        )
 
     def get_description(self, page_soup, arg):
         try:
@@ -112,11 +115,11 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
 
 class JobAdsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, relink_timeout):
-        super().__init__(relink_timeout=relink_timeout)
-
-        # @JoshK: Should these be arguments to the superclass constructor?
-        self.url = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
-        self.word = "job ad attribute"
+        super().__init__(
+            relink_timeout=relink_timeout,
+            url = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html",
+            word = "job ad attribute",
+        )
 
     def get_description(self, page_soup, arg):
         try:
@@ -151,13 +154,11 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
 
 class SubmitsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, relink_timeout):
-        super().__init__(relink_timeout=relink_timeout)
-
-        # @JoshK: Should these be arguments to the superclass constructor?
-        self.url = (
-            "https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html"
+        super().__init__(
+            relink_timeout=relink_timeout,
+            url="https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html",
+            word="submit file command"
         )
-        self.word = "submit file command"
 
     def get_description(self, page_soup, arg):
         try:
