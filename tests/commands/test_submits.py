@@ -5,11 +5,11 @@ import textwrap
 
 import bs4
 
+from web.commands import scrapers
+
 
 @pytest.fixture
 def sch():
-    from web.slashes import scrapers
-
     return scrapers.SubmitsCommandHandler(relink_timeout=300)
 
 

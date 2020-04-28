@@ -5,7 +5,7 @@ import time
 import htcondor
 import classad
 
-from web.slashes import classad_eval
+from web.commands import classad_eval
 
 
 @pytest.mark.parametrize(

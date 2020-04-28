@@ -5,11 +5,11 @@ import textwrap
 
 import bs4
 
+from web.commands import scrapers
+
 
 @pytest.fixture
 def kch():
-    from web.slashes import scrapers
-
     return scrapers.KnobsCommandHandler(relink_timeout=300)
 
 

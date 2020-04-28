@@ -2,7 +2,7 @@ import re
 import datetime
 
 import web.events as events
-import web.slashes as slashes
+import web.commands as commands
 
 DEBUG = False
 TESTING = False
@@ -39,8 +39,8 @@ MESSAGE_HANDLERS = [
 
 
 SLASH_COMMANDS = {
-    "knobs": slashes.KnobsCommandHandler(relink_timeout=five_minutes),
-    "jobads": slashes.JobAdsCommandHandler(relink_timeout=five_minutes),
-    "submits": slashes.SubmitsCommandHandler(relink_timeout=five_minutes),
-    "classad_eval": slashes.ClassadEvalCommandHandler(),
+    "knobs": commands.KnobsCommandHandler(relink_timeout=five_minutes),
+    "jobads": commands.JobAdsCommandHandler(relink_timeout=five_minutes),
+    "submits": commands.SubmitsCommandHandler(relink_timeout=five_minutes),
+    "classad_eval": commands.ClassadEvalCommandHandler(),
 }

@@ -5,11 +5,11 @@ import textwrap
 
 import bs4
 
+from web.commands import scrapers
+
 
 @pytest.fixture
 def jch():
-    from web.slashes import scrapers
-
     return scrapers.JobAdsCommandHandler(relink_timeout=300)
 
 
