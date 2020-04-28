@@ -106,3 +106,58 @@ def test_handle_classad_eval_end_to_end(mocker, client):
     assert "foo = 5" in msg
     assert "undefined" in msg
     assert "2" in msg
+
+
+def test_handle_classad_eval_classad_parse_failure_end_to_end(mocker, client):
+    mock = mocker.patch("web.slack.post_message")
+
+    client.post(
+        "/slash/classad_eval",
+        data=dict(
+            channel_id="1234", user_id="5678", text="'foo = bar, bar = 5]' 'foo' 'bar' '1 + 1'"
+        ),
+    )
+
+    # let the executor run
+    time.sleep(0.1)
+
+    assert mock.call_count == 1
+
+    channel = mock.call_args[1]["channel"]
+
+    assert channel == "1234"
+
+    msg = mock.call_args[1]["text"]
+
+    assert "Unable to parse string into a ClassAd" in msg
+
+
+def test_handle_classad_eval_expr_parse_failure_end_to_end(mocker, client):
+    mock = mocker.patch("web.slack.post_message")
+
+    client.post(
+        "/slash/classad_eval",
+        data=dict(
+            channel_id="1234", user_id="5678", text="'' ''* 123'"
+        ),
+    )
+
+    # let the executor run
+    time.sleep(0.1)
+
+    assert mock.call_count == 1
+
+    channel = mock.call_args[1]["channel"]
+
+    assert channel == "1234"
+
+    msg = mock.call_args[1]["text"]
+
+    # This syntax error's text should be different if it's coming from
+    # an expression rather than a ClassAd.
+    assert "Unable to parse string into a ClassAd" in msg
+
+
+# Upgrading to HTCondor 8.9.8 will get us access to GT#7607, which will
+# cause certain problems with bad expression to go away (e.g., 'x = y'
+# should not be parsed as 'x' and '123x' as '123').
