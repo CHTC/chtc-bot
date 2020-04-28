@@ -5,12 +5,17 @@ import textwrap
 
 import bs4
 
-from web.slashes import knobs
+from web.commands import scrapers
 
 
-def test_get_knob_description_returns_none_if_it_fails_to_find_the_knob():
+@pytest.fixture
+def kch():
+    return scrapers.KnobsCommandHandler(rescrape_timeout=300)
+
+
+def test_get_description_returns_none_if_it_fails_to_find_the_knob(kch):
     assert (
-        knobs.get_knob_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
+        kch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
         is None
     )
 
@@ -73,22 +78,23 @@ KNOB_SOUP = bs4.BeautifulSoup(KNOB_HTML, "html.parser")
         ("NOPE", None),
     ],
 )
-def test_get_knob_description(knob, expected):
+def test_get_knob_description(kch, knob, expected):
     # clean up the triple-quoted string
     expected = textwrap.dedent(expected).strip() if expected is not None else expected
 
-    assert knobs.get_knob_description(KNOB_SOUP, knob) == expected
+    assert kch.get_description(KNOB_SOUP, knob) == expected
 
 
 @pytest.mark.parametrize("memory", [False, True])
-def test_handle_knobs_end_to_end(mocker, client, memory):
+@pytest.mark.parametrize("channel_id", ["1234", "4321"])
+def test_handle_knobs_end_to_end(mocker, client, memory, channel_id):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = KNOB_HTML
 
     mock = mocker.patch("web.slack.post_message")
 
     client.post(
-        "/slash/knobs", data=dict(channel_id="1234", user_id="5678", text="CKPT_PROBE"),
+        "/slash/knobs", data=dict(channel_id=channel_id, user_id="5678", text="CKPT_PROBE"),
     )
 
     # let the executor run
@@ -99,7 +105,7 @@ def test_handle_knobs_end_to_end(mocker, client, memory):
     if not memory:
         assert mock.call_count == 1
         channel = mock.call_args[1]["channel"]
-        assert channel == "1234"
+        assert channel == channel_id
         msg = mock.call_args[1]["text"]
 
         # make a few assertions about the output message,

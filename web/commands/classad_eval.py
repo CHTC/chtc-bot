@@ -12,15 +12,18 @@ import classad
 from ..executor import executor
 from .. import slack, formatting
 
+from . import commands
 
-def handle_classad_eval():
-    channel = request.form.get("channel_id")
-    user = request.form.get("user_id")
-    text = html.unescape(request.form.get("text"))
 
-    executor.submit(classad_eval_reply, channel, user, text)
+class ClassadEvalCommandHandler(commands.CommandHandler):
+    def handle(self):
+        channel = request.form.get("channel_id")
+        user = request.form.get("user_id")
+        text = html.unescape(request.form.get("text"))
 
-    return f":thinking_face: :newspaper:", 200
+        executor.submit(classad_eval_reply, channel, user, text)
+
+        return f":thinking_face: :newspaper:", 200
 
 
 def classad_eval_reply(channel: str, user: str, text: str):

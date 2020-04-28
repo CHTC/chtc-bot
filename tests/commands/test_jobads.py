@@ -5,14 +5,17 @@ import textwrap
 
 import bs4
 
-from web.slashes import jobads
+from web.commands import scrapers
 
 
-def test_get_attrs_description_returns_none_if_it_fails_to_find_the_knob():
+@pytest.fixture
+def jch():
+    return scrapers.JobAdsCommandHandler(rescrape_timeout=300)
+
+
+def test_get_description_returns_none_if_it_fails_to_find_the_attr(jch):
     assert (
-        jobads.get_attrs_description(
-            bs4.BeautifulSoup("", features="html.parser"), "foo"
-        )
+        jch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
         is None
     )
 
@@ -60,7 +63,7 @@ ATTRS_SOUP = bs4.BeautifulSoup(ATTRS_HTML, "html.parser")
 
 
 @pytest.mark.parametrize(
-    "knob, expected",
+    "attr, expected",
     [
         (
             "AcctGroupUser",
@@ -72,15 +75,16 @@ ATTRS_SOUP = bs4.BeautifulSoup(ATTRS_HTML, "html.parser")
         ("NOPE", None),
     ],
 )
-def test_get_attrs_description(knob, expected):
+def test_get_description(jch, attr, expected):
     # clean up the triple-quoted string
     expected = textwrap.dedent(expected).strip() if expected is not None else expected
 
-    assert jobads.get_attrs_description(ATTRS_SOUP, knob) == expected
+    assert jch.get_description(ATTRS_SOUP, attr) == expected
 
 
 @pytest.mark.parametrize("memory", [False, True])
-def test_handle_jobads_end_to_end(mocker, client, memory):
+@pytest.mark.parametrize("channel_id", ["1234", "4321"])
+def test_handle_jobads_end_to_end(mocker, client, memory, channel_id):
     mock_get_url = mocker.patch("web.http.cached_get_url")
     mock_get_url.return_value.text = ATTRS_HTML
 
@@ -88,7 +92,7 @@ def test_handle_jobads_end_to_end(mocker, client, memory):
 
     client.post(
         "/slash/jobads",
-        data=dict(channel_id="1234", user_id="5678", text="AcctGroupUser"),
+        data=dict(channel_id=channel_id, user_id="5678", text="AcctGroupUser"),
     )
 
     # let the executor run
@@ -99,7 +103,7 @@ def test_handle_jobads_end_to_end(mocker, client, memory):
     if not memory:
         assert mock.call_count == 1
         channel = mock.call_args[1]["channel"]
-        assert channel == "1234"
+        assert channel == channel_id
         msg = mock.call_args[1]["text"]
 
         # make a few assertions about the output message,
