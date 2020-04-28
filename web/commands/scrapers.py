@@ -23,17 +23,8 @@ class WebScrapingCommandHandler(commands.CommandHandler):
     def handle(self):
         channel = request.form.get("channel_id")
 
-        args = []
-        skipped_args = []
         requested_args = html.unescape(request.form.get("text")).split(" ")
-
-        for arg in requested_args:
-            key = (arg.upper(), channel)
-            if key not in self.recently_linked_cache:
-                self.recently_linked_cache[key] = True
-                args.append(arg)
-            else:
-                skipped_args.append(arg)
+        skipped_args, args = self.seen_and_unseen(requested_args, channel)
 
         if len(args) == 0:
             return (
@@ -78,6 +69,19 @@ class WebScrapingCommandHandler(commands.CommandHandler):
 
         lines.extend(v + "\n" for v in good.values())
         slack.post_message(channel=channel, text="\n".join(lines))
+
+    def seen_and_unseen(self, requested_args, channel):
+        args = []
+        skipped_args = []
+        for arg in requested_args:
+            key = (arg.upper(), channel)
+            if key not in self.recently_linked_cache:
+                self.recently_linked_cache[key] = True
+                args.append(arg)
+            else:
+                skipped_args.append(arg)
+
+        return skipped_args, args
 
 
 class KnobsCommandHandler(WebScrapingCommandHandler):
@@ -170,7 +174,6 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
             # as an attribute search).
             expr = re.compile(f"^{arg}( |$)", re.I)
 
-            # ... lambda?
             def text_matches(tag):
                 return tag.name == "dt" and expr.search(tag.text)
 
