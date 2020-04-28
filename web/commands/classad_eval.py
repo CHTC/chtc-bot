@@ -16,9 +16,6 @@ from . import commands
 
 
 class ClassadEvalCommandHandler(commands.CommandHandler):
-    def __init__(self):
-        super().__init__()
-
     def handle(self):
         channel = request.form.get("channel_id")
         user = request.form.get("user_id")
