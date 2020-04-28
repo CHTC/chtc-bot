@@ -46,8 +46,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         return (message, 200)
 
     def reply(self, channel, user, args: List[str]):
-        response = http.cached_get_url(self.url)
-        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        soup = self.soup_line()
 
         lines = [
             f"<@{user}> asked for information on {self.word}"
@@ -83,6 +82,10 @@ class WebScrapingCommandHandler(commands.CommandHandler):
 
         return skipped_args, args
 
+    def soup_line(self):
+        response = http.cached_get_url(self.url)
+        soup = bs4.BeautifulSoup(response.text, "html.parser")
+        return soup
 
 class KnobsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, relink_timeout):
