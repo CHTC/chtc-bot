@@ -51,6 +51,21 @@ def test_it_doesnt_remember():
         d["non-key"]
 
 
+def test_it_forgets_despite_multiple_assignments():
+    d = ForgetfulDict(memory_time=0.2)
+
+    d["key"] = 5
+    time.sleep(0.1)
+    assert d["key"] == 5
+
+    d["key"] = 7
+    assert d["key"] == 7
+    time.sleep(0.1)
+
+    with pytest.raises(KeyError):
+        d["key"]
+
+
 def test_constructor_converts_timedeltas():
     d = ForgetfulDict(memory_time=datetime.timedelta(seconds=1))
 
