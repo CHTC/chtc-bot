@@ -12,13 +12,13 @@ from .. import http, slack, formatting, utils
 
 
 class WebScrapingCommandHandler(commands.CommandHandler):
-    def __init__(self, *, relink_timeout, url, word):
+    def __init__(self, *, rescrape_timeout, url, word):
         super().__init__()
 
         self.url = url
         self.word = word
 
-        self.recently_linked_cache = ForgetfulDict(memory_time=relink_timeout)
+        self.recently_linked_cache = ForgetfulDict(memory_time=rescrape_timeout)
 
     def handle(self):
         channel = request.form.get("channel_id")
@@ -88,9 +88,9 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         return soup
 
 class KnobsCommandHandler(WebScrapingCommandHandler):
-    def __init__(self, *, relink_timeout):
+    def __init__(self, *, rescrape_timeout):
         super().__init__(
-            relink_timeout=relink_timeout,
+            rescrape_timeout=rescrape_timeout,
             url="https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html",
             word="knob",
         )
@@ -121,9 +121,9 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
 
 
 class JobAdsCommandHandler(WebScrapingCommandHandler):
-    def __init__(self, *, relink_timeout):
+    def __init__(self, *, rescrape_timeout):
         super().__init__(
-            relink_timeout=relink_timeout,
+            rescrape_timeout=rescrape_timeout,
             url = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html",
             word = "job ad attribute",
         )
@@ -160,9 +160,9 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
 
 
 class SubmitsCommandHandler(WebScrapingCommandHandler):
-    def __init__(self, *, relink_timeout):
+    def __init__(self, *, rescrape_timeout):
         super().__init__(
-            relink_timeout=relink_timeout,
+            rescrape_timeout=rescrape_timeout,
             url="https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html",
             word="submit file command"
         )

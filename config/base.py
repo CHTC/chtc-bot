@@ -39,8 +39,8 @@ MESSAGE_HANDLERS = [
 
 
 SLASH_COMMANDS = {
-    "knobs": commands.KnobsCommandHandler(relink_timeout=five_minutes),
-    "jobads": commands.JobAdsCommandHandler(relink_timeout=five_minutes),
-    "submits": commands.SubmitsCommandHandler(relink_timeout=five_minutes),
+    "knobs": commands.KnobsCommandHandler(rescrape_timeout=five_minutes),
+    "jobads": commands.JobAdsCommandHandler(rescrape_timeout=five_minutes),
+    "submits": commands.SubmitsCommandHandler(rescrape_timeout=five_minutes),
     "classad_eval": commands.ClassadEvalCommandHandler(),
 }

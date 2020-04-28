@@ -10,7 +10,7 @@ from web.commands import scrapers
 
 @pytest.fixture
 def jch():
-    return scrapers.JobAdsCommandHandler(relink_timeout=300)
+    return scrapers.JobAdsCommandHandler(rescrape_timeout=300)
 
 
 def test_get_description_returns_none_if_it_fails_to_find_the_attr(jch):
