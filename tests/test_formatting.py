@@ -22,6 +22,17 @@ def test_fixed(input, expected):
     assert formatting.fixed(input) == expected
 
 
+@pytest.mark.parametrize(
+    "input, text, expected",
+    [
+        ("http://htcondor.org", None, "http://htcondor.org"),
+        ("http://htcondor.org", "HTCondor", "<http://htcondor.org|HTCondor>"),
+    ],
+)
+def test_link(input, text, expected):
+    assert formatting.link(input, text) == expected
+
+
 ATTRS_URL = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
 KNOBS_URL = (
     "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
