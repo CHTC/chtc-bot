@@ -41,7 +41,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         message += f" {', '.join(formatting.bold(k) for k in args)}"
         if len(skipped_args) != 0:
             message += f", skipping recently-viewed {self.word}"
-            message += f"{formatting.plural(skipped_args)}"
+            message += formatting.plural(skipped_args)
             message += f" {', '.join(formatting.bold(k) for k in skipped_args)}"
         return (message, 200)
 
