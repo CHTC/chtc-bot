@@ -1,9 +1,12 @@
+from typing import List
+
 import os
 import re
-import bs4
 import html
-from typing import List
+import abc
+
 from flask import current_app, request
+import bs4
 
 from . import commands
 from ..executor import executor
@@ -13,12 +16,10 @@ from .. import http, slack, formatting, utils
 
 class WebScrapingCommandHandler(commands.CommandHandler):
     def __init__(self, *, rescrape_timeout, url, word):
-        super().__init__()
-
         self.url = url
         self.word = word
 
-        self.recently_linked_cache = ForgetfulDict(memory_time=rescrape_timeout)
+        self.recently_scraped = ForgetfulDict(memory_time=rescrape_timeout)
 
     def handle(self):
         channel = request.form.get("channel_id")
@@ -55,7 +56,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         ]
 
         descriptions = {arg: self.get_description(soup, arg) for arg in args}
-        good, bad = utils.partition(descriptions, key=lambda v: v is not None)
+        good, bad = utils.partition_mapping(descriptions, key=lambda v: v is not None)
 
         if bad:
             p1 = "they were" if len(bad) > 1 else "it was"
@@ -70,22 +71,24 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         slack.post_message(channel=channel, text="\n".join(lines))
 
     def seen_and_unseen(self, requested_args, channel):
-        args = []
-        skipped_args = []
-        for arg in requested_args:
-            key = (arg.upper(), channel)
-            if key not in self.recently_linked_cache:
-                self.recently_linked_cache[key] = True
-                args.append(arg)
-            else:
-                skipped_args.append(arg)
+        seen, unseen = utils.partition_collection(
+            requested_args,
+            key=lambda arg: not self.recently_scraped.set_if_unset(
+                (arg.upper(), channel), None
+            ),
+        )
 
-        return skipped_args, args
+        return seen, unseen
 
     def soup_line(self):
         response = http.cached_get_url(self.url)
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         return soup
+
+    @abc.abstractmethod
+    def get_description(self, page_soup: bs4.BeautifulSoup, arg: str):
+        raise NotImplementedError
+
 
 class KnobsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, rescrape_timeout):
@@ -95,7 +98,7 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
             word="knob",
         )
 
-    def get_description(self, page_soup, arg):
+    def get_description(self, page_soup: bs4.BeautifulSoup, arg: str):
         try:
             header = page_soup.find("span", id=arg)
 
@@ -124,11 +127,11 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, rescrape_timeout):
         super().__init__(
             rescrape_timeout=rescrape_timeout,
-            url = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html",
-            word = "job ad attribute",
+            url="https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html",
+            word="job ad attribute",
         )
 
-    def get_description(self, page_soup, arg):
+    def get_description(self, page_soup: bs4.BeautifulSoup, arg: str):
         try:
             # This can't be the efficient way to do this.
             spans = page_soup.select(
@@ -164,10 +167,10 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
         super().__init__(
             rescrape_timeout=rescrape_timeout,
             url="https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html",
-            word="submit file command"
+            word="submit file command",
         )
 
-    def get_description(self, page_soup, arg):
+    def get_description(self, page_soup: bs4.BeautifulSoup, arg: str):
         try:
             start = page_soup.find("div", id="submit-description-file-commands")
 

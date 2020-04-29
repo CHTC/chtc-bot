@@ -114,7 +114,9 @@ def test_handle_classad_eval_classad_parse_failure_end_to_end(mocker, client):
     client.post(
         "/slash/classad_eval",
         data=dict(
-            channel_id="1234", user_id="5678", text="'foo = bar, bar = 5]' 'foo' 'bar' '1 + 1'"
+            channel_id="1234",
+            user_id="5678",
+            text="'foo = bar, bar = 5]' 'foo' 'bar' '1 + 1'",
         ),
     )
 
@@ -137,9 +139,7 @@ def test_handle_classad_eval_expr_parse_failure_end_to_end(mocker, client):
 
     client.post(
         "/slash/classad_eval",
-        data=dict(
-            channel_id="1234", user_id="5678", text="'' ''* 123'"
-        ),
+        data=dict(channel_id="1234", user_id="5678", text="'' ''* 123'"),
     )
 
     # let the executor run
@@ -163,9 +163,7 @@ def test_handle_classad_eval_with_empty_ad_end_to_end(mocker, client):
 
     client.post(
         "/slash/classad_eval",
-        data=dict(
-            channel_id="1234", user_id="5678", text="'' 'foo' 'bar' '5 + 3'"
-        ),
+        data=dict(channel_id="1234", user_id="5678", text="'' 'foo' 'bar' '5 + 3'"),
     )
 
     # let the executor run

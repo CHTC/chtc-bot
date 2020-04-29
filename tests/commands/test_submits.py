@@ -272,7 +272,8 @@ def test_handle_submits_end_to_end(mocker, client, memory, channel_id):
     mock = mocker.patch("web.slack.post_message")
 
     client.post(
-        "/slash/submits", data=dict(channel_id=channel_id, user_id="5678", text="error"),
+        "/slash/submits",
+        data=dict(channel_id=channel_id, user_id="5678", text="error"),
     )
 
     # let the executor run
