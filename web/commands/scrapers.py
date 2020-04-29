@@ -71,17 +71,14 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         slack.post_message(channel=channel, text="\n".join(lines))
 
     def seen_and_unseen(self, requested_args, channel):
-        args = []
-        skipped_args = []
-        for arg in requested_args:
-            key = (arg.upper(), channel)
-            if key not in self.recently_scraped:
-                self.recently_scraped[key] = True
-                args.append(arg)
-            else:
-                skipped_args.append(arg)
+        seen, unseen = utils.partition_collection(
+            requested_args,
+            key=lambda arg: not self.recently_scraped.set_if_unset(
+                (arg.upper(), channel), None
+            ),
+        )
 
-        return skipped_args, args
+        return seen, unseen
 
     def soup_line(self):
         response = http.cached_get_url(self.url)
