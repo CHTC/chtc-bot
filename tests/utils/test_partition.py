@@ -1,6 +1,6 @@
 import pytest
 
-from web.utils import partition_mapping
+from web.utils import partition
 
 
 @pytest.mark.parametrize(
@@ -14,11 +14,11 @@ from web.utils import partition_mapping
     ],
 )
 def test_partition(mapping, key, expected):
-    assert partition_mapping(mapping, key=key) == expected
+    assert partition(mapping, key=key) == expected
 
 
 def test_partition_with_bad_key():
     d = {1: "foo"}
 
     with pytest.raises(ValueError):
-        partition_mapping(d)
+        partition(d)

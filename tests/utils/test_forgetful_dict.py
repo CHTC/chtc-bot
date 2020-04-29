@@ -51,7 +51,7 @@ def test_it_doesnt_remember():
         d["non-key"]
 
 
-def test_it_doesnt_forget_with_multiple_assignments():
+def test_it_forgets_despite_multiple_assignments():
     d = ForgetfulDict(memory_time=0.2)
 
     d["key"] = 5
@@ -60,31 +60,13 @@ def test_it_doesnt_forget_with_multiple_assignments():
 
     d["key"] = 7
     assert d["key"] == 7
-    time.sleep(0.11)
+    time.sleep(0.1)
 
-    assert "key" in d
-
-    time.sleep(0.2)
-
-    assert "key" not in d
+    with pytest.raises(KeyError):
+        d["key"]
 
 
 def test_constructor_converts_timedeltas():
     d = ForgetfulDict(memory_time=datetime.timedelta(seconds=1))
 
     assert d.memory_time == 1
-
-
-def test_set_if_unset_with_key_missing():
-    d = ForgetfulDict(memory_time=1)
-
-    assert d.set_if_unset("key", None)
-
-
-def test_set_if_unset_with_key_found():
-    d = ForgetfulDict(memory_time=1)
-
-    d["key"] = "This"
-
-    assert not d.set_if_unset("key", "Nope")
-    assert d["key"] == "This"

@@ -94,8 +94,7 @@ def test_handle_knobs_end_to_end(mocker, client, memory, channel_id):
     mock = mocker.patch("web.slack.post_message")
 
     client.post(
-        "/slash/knobs",
-        data=dict(channel_id=channel_id, user_id="5678", text="CKPT_PROBE"),
+        "/slash/knobs", data=dict(channel_id=channel_id, user_id="5678", text="CKPT_PROBE"),
     )
 
     # let the executor run
