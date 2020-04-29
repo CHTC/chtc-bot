@@ -87,6 +87,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         soup = bs4.BeautifulSoup(response.text, "html.parser")
         return soup
 
+
 class KnobsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, rescrape_timeout):
         super().__init__(
@@ -124,8 +125,8 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, rescrape_timeout):
         super().__init__(
             rescrape_timeout=rescrape_timeout,
-            url = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html",
-            word = "job ad attribute",
+            url="https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html",
+            word="job ad attribute",
         )
 
     def get_description(self, page_soup, arg):
@@ -164,7 +165,7 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
         super().__init__(
             rescrape_timeout=rescrape_timeout,
             url="https://htcondor.readthedocs.io/en/latest/man-pages/condor_submit.html",
-            word="submit file command"
+            word="submit file command",
         )
 
     def get_description(self, page_soup, arg):
