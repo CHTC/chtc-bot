@@ -1,6 +1,15 @@
-from typing import Union, Mapping, TypeVar, Optional, Callable, Tuple, Dict
-
-import collections
+from typing import (
+    Union,
+    Mapping,
+    TypeVar,
+    Optional,
+    Callable,
+    Tuple,
+    Dict,
+    Collection,
+    List,
+)
+from collections.abc import MutableMapping
 
 import time
 import datetime
@@ -52,21 +61,58 @@ K = TypeVar("K")
 V = TypeVar("V")
 
 
-def partition(
+def partition_collection(
+    collection: V, key: Optional[Callable[[V], bool]] = None
+) -> Tuple[List[V], List[V]]:
+    """
+    Partition the elements of a collection into two lists by evaluating a key
+    function against their values. The first (second) list is the one where
+    the key function returned ``True`` (``False``).
+
+    Parameters
+    ----------
+    collection
+        A collection to partition into two groups by the key function.
+    key
+        The function applied to each value in the collection to determine which
+        group it should be in.
+
+    Returns
+    -------
+    t, f
+        Two mappings; one for the key-True items, and one for the key-False items.
+    """
+    if key is None:
+        key = lambda _: _
+
+    goodbad = {True: [], False: []}
+
+    for v in collection:
+        try:
+            goodbad[key(v)].append(v)
+        except KeyError as e:
+            raise ValueError(
+                "The partition key function must return a bool (True or False)"
+            ) from e
+
+    return goodbad[True], goodbad[False]
+
+
+def partition_mapping(
     mapping: Mapping[K, V], key: Optional[Callable[[V], bool]] = None
 ) -> Tuple[Dict[K, V], Dict[K, V]]:
     """
     Partition the items of a mapping into two new mappings by evaluating a key
     function against their values. The first (second) mapping is the one where
-    the key function returned True (False).
+    the key function returned ``True`` (``False``).
 
     Parameters
     ----------
     mapping
         A mapping to partition into two groups by the key function.
     key
-        The function applied to each value in mapping to determine which group
-        it should be in.
+        The function applied to each value in the mapping to determine which
+        group it should be in.
 
     Returns
     -------
