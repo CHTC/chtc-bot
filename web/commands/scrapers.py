@@ -165,6 +165,26 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
             return None
 
 
+def hard_wrap_line(line, spaces):
+    rv = ""
+    length = 0
+    for word in line.split():
+        if length > 80:
+            rv += f"<br>{spaces}"
+            length = 0
+        length += len(word.replace("<br>", " ")) + 1
+        rv += f"{word} "
+    return rv[0:-1]
+
+
+def hard_wrap(text, spaces):
+    rv = ""
+    lines = text.split("<br>")
+    for line in lines:
+        rv += hard_wrap_line(line, spaces) + "<br>"
+    return rv[0:-4]
+
+
 # BeautifulSoup assumes that you always want to be able to traverse the whole
 # soup from any tag in it, so you have to do your own recursion if you care
 # about tag boundaries.
@@ -187,7 +207,8 @@ def replace_lists_in(description, depth=0):
             for i in range(0, depth):
                 spaces += "<space><space><space>"
 
-            child.replace_with(f"{spaces}\u2022 {child.text}<br>")
+            hw = hard_wrap(child.text, f"{spaces}<space><space><space>")
+            child.replace_with(f"{spaces}\u2022 {hw}<br>")
 
 
 class SubmitsCommandHandler(WebScrapingCommandHandler):
@@ -230,7 +251,10 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 replace_lists_in(description)
 
                 text_description = formatting.compress_whitespace(description.text)
-                text_description = text_description.replace("<br> <br>", "<br>")
+                # When a list is the last tag in a list item, we insert one
+                # <br> for end of the last item in the last and another for
+                # end of the containing list item.  Merge them together.
+                text_description = text_description.replace("<br><br>", "<br>")
                 text_description = text_description.replace("<br>", "\n>")
                 text_description = text_description.replace("<space>", " ")
 
