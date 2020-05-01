@@ -165,6 +165,31 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
             return None
 
 
+# BeautifulSoup assumes that you always want to be able to traverse the whole
+# soup from any tag in it, so you have to do your own recursion if you care
+# about tag boundaries.
+def replace_lists_in(description, depth=0):
+    try:
+        children = description.children
+    except AttributeError:
+        return
+
+    for child in children:
+        if child.name == "ul":
+            replace_lists_in(child, depth + 1)
+
+            child.replace_with(f"<br>{child.text}")
+        else:
+            replace_lists_in(child, depth)
+
+        if child.name == "li":
+            spaces = ""
+            for i in range(0, depth):
+                spaces += "<space><space><space>"
+
+            child.replace_with(f"{spaces}\u2022 {child.text}<br>")
+
+
 class SubmitsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, rescrape_timeout):
         super().__init__(
@@ -202,20 +227,12 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 ]:
                     converter(description)
 
-                for list in description.find_all("ol"):
-                    replacement = "<br>"
-                    for li in list.select("ol > li"):
-                        replacement += f"\u2022 {li.text}<br>"
-                    list.replace_with(replacement)
-
-                for list in description.find_all("ul"):
-                    replacement = "<br>"
-                    for li in list.select("ul > li"):
-                        replacement += f"\u2022 {li.text}<br>"
-                    list.replace_with(replacement)
+                replace_lists_in(description)
 
                 text_description = formatting.compress_whitespace(description.text)
+                text_description = text_description.replace("<br> <br>", "<br>")
                 text_description = text_description.replace("<br>", "\n>")
+                text_description = text_description.replace("<space>", " ")
 
                 result = f"{formatting.bold(dt.text)}\n>{text_description}"
                 if whole_description is None:
