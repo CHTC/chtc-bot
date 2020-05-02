@@ -14,6 +14,17 @@ from ..utils import ForgetfulDict
 from .. import http, slack, formatting, utils
 
 
+def flatten(list: List):
+    rv = []
+    for item in list:
+        try:
+            for k in item.items():
+                rv.append(k)
+        except AttributeError:
+            rv.append(item)
+    return rv
+
+
 class WebScrapingCommandHandler(commands.CommandHandler):
     def __init__(self, *, rescrape_timeout, url, word):
         self.url = url
@@ -67,8 +78,12 @@ class WebScrapingCommandHandler(commands.CommandHandler):
                 + f".  Perhaps {p1} misspelled, or {p2} exist?"
             )
 
-        lines.extend(v + "\n" for v in good.values())
-        slack.post_message(channel=channel, text="\n".join(lines))
+        good = flatten(good.values())
+        lines.append(good.pop(0) + "\n")
+        r = slack.post_message(channel=channel, text="\n".join(lines))
+
+        for g in good:
+            slack.post_message(channel=channel, text=f"{g}\n", ts=r.ts)
 
     def seen_and_unseen(self, requested_args, channel):
         args = []
@@ -255,7 +270,7 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
 
             dts = start.find_all_next(text_matches)
 
-            whole_description = None
+            descriptions = []
             for dt in dts:
                 description = dt.find_next("dd")
                 for converter in [
@@ -286,12 +301,13 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                     text_description = text_description[2:]
 
                 result = f"{formatting.bold(dt.text)}\n>{text_description}"
-                if whole_description is None:
-                    whole_description = result
-                else:
-                    whole_description += f"\n{result}"
-
-            return whole_description
+                descriptions.append(result)
+            if len(descriptions) == 0:
+                return None
+            elif len(descriptions) == 1:
+                return descriptions[0]
+            else:
+                return descriptions
 
         except Exception as e:
             current_app.logger.exception(
