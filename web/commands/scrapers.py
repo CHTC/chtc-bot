@@ -188,15 +188,20 @@ def hard_wrap(text, spaces):
 # BeautifulSoup assumes that you always want to be able to traverse the whole
 # soup from any tag in it, so you have to do your own recursion if you care
 # about tag boundaries.
-def replace_lists_in(description, depth=0):
+def replace_lists_in(description, depth=0, ordered=False):
     try:
         children = description.children
     except AttributeError:
         return
 
+    number = 1
     for child in children:
         if child.name == "ul":
             replace_lists_in(child, depth + 1)
+
+            child.replace_with(f"<br>{child.text}")
+        elif child.name == "ol":
+            replace_lists_in(child, depth + 1, True)
 
             child.replace_with(f"<br>{child.text}")
         else:
@@ -208,7 +213,11 @@ def replace_lists_in(description, depth=0):
                 spaces += "<space><space><space>"
 
             hw = hard_wrap(child.text, f"{spaces}<space><space><space>")
-            child.replace_with(f"{spaces}\u2022 {hw}<br>")
+            bullet = "\u2022"
+            if ordered:
+                bullet = f"{number}."
+                number += 1
+            child.replace_with(f"{spaces}{bullet} {hw}<br>")
 
 
 class SubmitsCommandHandler(WebScrapingCommandHandler):
