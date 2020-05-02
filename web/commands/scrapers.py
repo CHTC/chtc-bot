@@ -172,7 +172,7 @@ def hard_wrap_line(line, spaces):
         if length > 80:
             rv += f"<br>{spaces}"
             length = 0
-        length += len(word.replace("<br>", " ")) + 1
+        length += len(word.replace("<space>", " ")) + 1
         rv += f"{word} "
     return rv[0:-1]
 
@@ -188,6 +188,9 @@ def hard_wrap(text, spaces):
 # BeautifulSoup assumes that you always want to be able to traverse the whole
 # soup from any tag in it, so you have to do your own recursion if you care
 # about tag boundaries.
+#
+# If we find an example of a list nested under an ordered list item, we can
+# convert depth to the spaces string used to do word-wrapping.
 def replace_lists_in(description, depth=0, ordered=False):
     try:
         children = description.children
@@ -208,15 +211,19 @@ def replace_lists_in(description, depth=0, ordered=False):
             replace_lists_in(child, depth)
 
         if child.name == "li":
+            indent = "<space><space><space><space>"
+
             spaces = ""
             for i in range(0, depth):
-                spaces += "<space><space><space>"
+                spaces += indent
 
-            hw = hard_wrap(child.text, f"{spaces}<space><space><space><space>")
             bullet = "\u2022"
             if ordered:
+                indent += "<space>"
                 bullet = f"{number}."
                 number += 1
+
+            hw = hard_wrap(child.text, f"{spaces}{indent}")
             child.replace_with(f"{spaces}{bullet} {hw}<br>")
 
 
@@ -273,8 +280,10 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 text_description = text_description.replace("<br>", "\n>")
                 text_description = text_description.replace("<space>", " ")
 
-                if text_description.endswith(">"):
+                if text_description.endswith("\n>"):
                     text_description = text_description[0:-1]
+                if text_description.startswith("\n"):
+                    text_description = text_description[2:]
 
                 result = f"{formatting.bold(dt.text)}\n>{text_description}"
                 if whole_description is None:
