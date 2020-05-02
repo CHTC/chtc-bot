@@ -212,12 +212,17 @@ def replace_lists_in(description, depth=0, ordered=False):
             for i in range(0, depth):
                 spaces += "<space><space><space>"
 
-            hw = hard_wrap(child.text, f"{spaces}<space><space><space>")
+            hw = hard_wrap(child.text, f"{spaces}<space><space><space><space>")
             bullet = "\u2022"
             if ordered:
                 bullet = f"{number}."
                 number += 1
             child.replace_with(f"{spaces}{bullet} {hw}<br>")
+
+
+def preserve_paragraph_breaks_in(description):
+    for p in description.find_all("p"):
+        p.replace_with(f"<br>{p.text}<br>")
 
 
 class SubmitsCommandHandler(WebScrapingCommandHandler):
@@ -258,6 +263,7 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                     converter(description)
 
                 replace_lists_in(description)
+                preserve_paragraph_breaks_in(description)
 
                 text_description = formatting.compress_whitespace(description.text)
                 # When a list is the last tag in a list item, we insert one
@@ -266,6 +272,9 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 text_description = text_description.replace("<br><br>", "<br>")
                 text_description = text_description.replace("<br>", "\n>")
                 text_description = text_description.replace("<space>", " ")
+
+                if text_description.endswith(">"):
+                    text_description = text_description[0:-1]
 
                 result = f"{formatting.bold(dt.text)}\n>{text_description}"
                 if whole_description is None:
