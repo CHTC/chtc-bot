@@ -82,7 +82,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         r = slack.post_message(channel=channel, text="\n".join(lines))
 
         for g in good:
-            slack.post_message(channel=channel, text=f"{g}\n", ts=r["ts"])
+            slack.post_message(channel=channel, text=f"{g}\n", thread_ts=r["ts"])
 
     def seen_and_unseen(self, requested_args, channel):
         args = []
