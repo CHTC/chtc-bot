@@ -17,11 +17,10 @@ from .. import http, slack, formatting, utils
 def flatten(list: List):
     rv = []
     for item in list:
-        try:
-            for k in item.items():
-                rv.append(k)
-        except AttributeError:
+        if isinstance(item, str):
             rv.append(item)
+        else:
+            rv.extend(item)
     return rv
 
 
@@ -83,7 +82,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         r = slack.post_message(channel=channel, text="\n".join(lines))
 
         for g in good:
-            slack.post_message(channel=channel, text=f"{g}\n", ts=r.ts)
+            slack.post_message(channel=channel, text=f"{g}\n", ts=r["ts"])
 
     def seen_and_unseen(self, requested_args, channel):
         args = []
