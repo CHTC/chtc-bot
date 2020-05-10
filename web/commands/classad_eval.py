@@ -58,10 +58,11 @@ def generate_classad_eval_reply(user: str, text: str):
             last_ad = result
         else:
             if ad_changed:
-                if len(last_ad) <= 3 and len(str(ad)) <= 80:
-                    display_ad = str(last_ad)
-                else:
+                ad_is_short = len(last_ad) <= 3 and len(str(last_ad)) <= 80
+                if ad_is_short:
                     display_ad = repr(last_ad)
+                else:
+                    display_ad = str(last_ad)
 
                 msg_lines.append(f"Ad modified:" if has_printed_an_expr else "Ad:",)
                 msg_lines.append(
