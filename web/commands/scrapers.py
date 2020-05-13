@@ -81,7 +81,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
             if len(description) < 512:
                 text = f"{lines[0]}\n{description}"
             else:
-                short = hard_shorten(description, width)
+                short = hard_shorten(description, 512)
                 text = f"{lines[0]}\n{short}... [<{full_url}|the rest>]\n"
             slack.post_message(channel=channel, text=text)
 
