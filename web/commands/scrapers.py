@@ -4,6 +4,7 @@ import os
 import re
 import html
 import abc
+import textwrap
 
 from flask import current_app, request
 import bs4
@@ -69,10 +70,11 @@ class WebScrapingCommandHandler(commands.CommandHandler):
 
         for arg, (description, anchor) in good.items():
             full_url = f"{self.url}#{anchor}"
-            if len(description) < 288:
+            if len(description) < 512:
                 text = f"{lines[0]}\n{description}";
             else:
-                text = f"{lines[0]}\n{description[0:287]}\n...<{full_url}|the rest>\n";
+                short = textwrap.shorten(description, width=512, placeholder="...")
+                text = f"{lines[0]}\n{short} [<{full_url}|the rest>]\n";
             slack.post_message(channel=channel, text=text)
 
     def seen_and_unseen(self, requested_args, channel):
@@ -172,6 +174,8 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
             return None
 
 
+# This and hard_wrap could probably be replaced by textwrap.fill()
+# using the initial_indent and subsequent_indent keywords.  *sigh*
 def hard_wrap_line(line, spaces):
     rv = ""
     length = 0
