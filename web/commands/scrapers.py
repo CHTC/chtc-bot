@@ -14,16 +14,6 @@ from ..utils import ForgetfulDict
 from .. import http, slack, formatting, utils
 
 
-def flatten(list: List):
-    rv = []
-    for item in list:
-        if isinstance(item, str):
-            rv.append(item)
-        else:
-            rv.extend(item)
-    return rv
-
-
 class WebScrapingCommandHandler(commands.CommandHandler):
     def __init__(self, *, rescrape_timeout, url, word):
         self.url = url
@@ -77,12 +67,13 @@ class WebScrapingCommandHandler(commands.CommandHandler):
                 + f".  Perhaps {p1} misspelled, or {p2} exist?"
             )
 
-        good = flatten(good.values())
-        lines.append(good.pop(0) + "\n")
-        r = slack.post_message(channel=channel, text="\n".join(lines))
-
-        for g in good:
-            slack.post_message(channel=channel, text=f"{g}\n", thread_ts=r["ts"])
+        for arg, (description, anchor) in good.items():
+            full_url = f"{self.url}#{anchor}"
+            if len(description) < 288:
+                text = f"{lines[0]}\n{description}";
+            else:
+                text = f"{lines[0]}\n{description[0:287]}\n...<{full_url}|the rest>\n";
+            slack.post_message(channel=channel, text=text)
 
     def seen_and_unseen(self, requested_args, channel):
         args = []
@@ -119,6 +110,7 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
         try:
             header = page_soup.find("span", id=arg)
 
+            anchor = header["id"]
             description = header.parent.find_next("dd")
             for converter in [
                 formatting.inplace_convert_em_to_underscores,
@@ -132,7 +124,7 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
                 converter(description)
 
             text_description = formatting.compress_whitespace(description.text)
-            return f"{formatting.bold(arg)}\n>{text_description}"
+            return f"{formatting.bold(arg)}\n>{text_description}", anchor
         except Exception as e:
             current_app.logger.exception(
                 f"Error while trying to find {self.word} {arg}: {e}"
@@ -157,6 +149,7 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
 
             for span in spans:
                 if span.text.lower() == arg.lower():
+                    anchor = span.find_previous("span", class_="target")["id"]
                     description = span.parent.parent.find_next("dd")
                     for converter in [
                         formatting.inplace_convert_em_to_underscores,
@@ -170,7 +163,7 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
                         converter(description)
 
                     text_description = formatting.compress_whitespace(description.text)
-                    return f"{formatting.bold(span.text)}\n>{text_description}"
+                    return f"{formatting.bold(span.text)}\n>{text_description}", anchor
             return None
         except Exception as e:
             current_app.logger.exception(
@@ -269,8 +262,14 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
 
             dts = start.find_all_next(text_matches)
 
+            # We'll assume that all of the subsequent descriptions are
+            # immediately subsequent and that the first anchor is the
+            # correct one to use if the description is shortened.
+            anchor = None
             descriptions = []
             for dt in dts:
+                if anchor is None:
+                    anchor = dt.find_previous("span", class_="target")["id"]
                 description = dt.find_next("dd")
                 for converter in [
                     formatting.inplace_convert_em_to_underscores,
@@ -301,12 +300,13 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
 
                 result = f"{formatting.bold(dt.text)}\n>{text_description}"
                 descriptions.append(result)
+
             if len(descriptions) == 0:
-                return None
+                return None;
             elif len(descriptions) == 1:
-                return descriptions[0]
+                return (descriptions[0], anchor)
             else:
-                return descriptions
+                return ("\n".join(descriptions), anchor)
 
         except Exception as e:
             current_app.logger.exception(

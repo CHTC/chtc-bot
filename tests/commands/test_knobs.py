@@ -66,7 +66,7 @@ KNOB_SOUP = bs4.BeautifulSoup(KNOB_HTML, "html.parser")
 
 
 @pytest.mark.parametrize(
-    "knob, expected",
+    "knob, expected, anchor",
     [
         (
             "CKPT_PROBE",
@@ -74,13 +74,14 @@ KNOB_SOUP = bs4.BeautifulSoup(KNOB_HTML, "html.parser")
             *CKPT_PROBE*
             >Defines the path and executable name of the helper process HTCondor will use to determine information for the `CheckpointPlatform` attribute in the machine’s ClassAd. The default value is `$(LIBEXEC)/condor_ckpt_probe`.
             """,
+            "CKPT_PROBE"
         ),
-        ("NOPE", None),
+        ("NOPE", None, None),
     ],
 )
-def test_get_knob_description(kch, knob, expected):
+def test_get_knob_description(kch, knob, expected, anchor):
     # clean up the triple-quoted string
-    expected = textwrap.dedent(expected).strip() if expected is not None else expected
+    expected = (textwrap.dedent(expected).strip(), anchor) if expected is not None else expected
 
     assert kch.get_description(KNOB_SOUP, knob) == expected
 
