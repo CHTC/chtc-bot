@@ -4,7 +4,6 @@ import os
 import re
 import html
 import abc
-import textwrap
 
 from flask import current_app, request
 import bs4
@@ -13,6 +12,12 @@ from . import commands
 from ..executor import executor
 from ..utils import ForgetfulDict
 from .. import http, slack, formatting, utils
+
+
+def hard_shorten(text, limit):
+    while text[limit] != " ":
+        limit -= 1
+    return text[0:limit]
 
 
 class WebScrapingCommandHandler(commands.CommandHandler):
@@ -74,10 +79,10 @@ class WebScrapingCommandHandler(commands.CommandHandler):
         for arg, (description, anchor) in good.items():
             full_url = f"{self.url}#{anchor}"
             if len(description) < 512:
-                text = f"{lines[0]}\n{description}";
+                text = f"{lines[0]}\n{description}"
             else:
-                short = textwrap.shorten(description, width=512, placeholder="...", replace_whitespace=False)
-                text = f"{lines[0]}\n{short} [<{full_url}|the rest>]\n";
+                short = hard_shorten(description, width)
+                text = f"{lines[0]}\n{short}... [<{full_url}|the rest>]\n"
             slack.post_message(channel=channel, text=text)
 
     def seen_and_unseen(self, requested_args, channel):
@@ -177,8 +182,6 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
             return None
 
 
-# This and hard_wrap could probably be replaced by textwrap.fill()
-# using the initial_indent and subsequent_indent keywords.  *sigh*
 def hard_wrap_line(line, spaces):
     rv = ""
     length = 0
@@ -309,7 +312,7 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 descriptions.append(result)
 
             if len(descriptions) == 0:
-                return None;
+                return None
             elif len(descriptions) == 1:
                 return (descriptions[0], anchor)
             else:

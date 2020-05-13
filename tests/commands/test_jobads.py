@@ -71,14 +71,18 @@ ATTRS_SOUP = bs4.BeautifulSoup(ATTRS_HTML, "html.parser")
             *AcctGroupUser*
             >The user name associated with the accounting group. This attribute is only present if an accounting group was requested by the submission.
             """,
-            "index-7"
+            "index-7",
         ),
         ("NOPE", None, None),
     ],
 )
 def test_get_description(jch, attr, expected, anchor):
     # clean up the triple-quoted string
-    expected = (textwrap.dedent(expected).strip(), anchor) if expected is not None else expected
+    expected = (
+        (textwrap.dedent(expected).strip(), anchor)
+        if expected is not None
+        else expected
+    )
 
     assert jch.get_description(ATTRS_SOUP, attr) == expected
 
