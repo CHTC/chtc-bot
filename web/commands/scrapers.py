@@ -68,12 +68,15 @@ class WebScrapingCommandHandler(commands.CommandHandler):
                 + f".  Perhaps {p1} misspelled, or {p2} exist?"
             )
 
+        if len(good) == 0:
+            slack.post_message(channel=channel, text="\n".join(lines))
+
         for arg, (description, anchor) in good.items():
             full_url = f"{self.url}#{anchor}"
             if len(description) < 512:
                 text = f"{lines[0]}\n{description}";
             else:
-                short = textwrap.shorten(description, width=512, placeholder="...")
+                short = textwrap.shorten(description, width=512, placeholder="...", replace_whitespace=False)
                 text = f"{lines[0]}\n{short} [<{full_url}|the rest>]\n";
             slack.post_message(channel=channel, text=text)
 
