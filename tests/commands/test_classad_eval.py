@@ -78,13 +78,7 @@ def ads_equal(a, b):
 
 
 @pytest.mark.parametrize(
-    "text",
-    [
-        "'[foo]'",
-        "'[foo = 1]' '^'",
-        "'[ $ & ; foo ]' 'True'",
-        "'a 1 = b 2 c = d 3 e' 'True' 'self'",
-    ],
+    "text", ["'[foo]'", "'[foo = 1]' '^'", "'[ $ & ; foo ]' 'True'",],
 )
 def test_bad_parsing(text):
     with pytest.raises(SyntaxError):
