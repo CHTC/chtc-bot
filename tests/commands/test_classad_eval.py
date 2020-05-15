@@ -1,3 +1,5 @@
+import itertools
+
 import pytest
 
 import time
@@ -53,14 +55,21 @@ from web.commands import classad_eval
                 classad.ExprTree("a > b"),
             ],
         ),
+        ("'[ a = 5; ]' 'a'", [classad.ClassAd({"a": 5}), classad.ExprTree("a")]),
+        ("'[ a = 5; ]' a", [classad.ClassAd({"a": 5}), classad.ExprTree("a")]),
+        ("'[ a = 5; ]' \"a\"", [classad.ClassAd({"a": 5}), classad.ExprTree("a")]),
     ],
 )
 def test_parsing(text, expected):
     parsed = classad_eval.parse(text)
 
+    print(text)
+    for val in parsed:
+        print(val)
+
     assert all(
         p.sameAs(e) if isinstance(e, classad.ExprTree) else ads_equal(p, e)
-        for p, e in zip(parsed, expected)
+        for p, e in itertools.zip_longest(parsed, expected)
     )
 
 
@@ -69,7 +78,13 @@ def ads_equal(a, b):
 
 
 @pytest.mark.parametrize(
-    "text", ["'[foo]'", "'[foo = 1]' '^'",],
+    "text",
+    [
+        "'[foo]'",
+        "'[foo = 1]' '^'",
+        "'[ $ & ; foo ]' 'True'",
+        "'a 1 = b 2 c = d 3 e' 'True' 'self'",
+    ],
 )
 def test_bad_parsing(text):
     with pytest.raises(SyntaxError):

@@ -18,6 +18,11 @@ def fixed(text):
     return f"`{text}`"
 
 
+def fixed_block(text):
+    """Wrap text in markdown block fixed text markers."""
+    return f"```\n{text}\n```"
+
+
 def link(url, text=None):
     """Construct a Slack-encoded link. If text is None, the raw URL is returned."""
     if text is not None:
