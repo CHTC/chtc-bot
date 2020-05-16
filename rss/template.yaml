@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: CHTC bot -- HTCondor Wiki RSS feed reader
+
+Resources:
+    rssfunction:
+        Type: 'AWS::Serverless::Function'
+        Properties:
+            Handler: lambda.handler
+            Runtime: python3.8
+            CodeUri: lambda/
+            Description: 'Poll the RSS feed'
+            MemorySize: 3000
+            Timeout: 60
+            Policies:
+                - DynamoDBCrudPolicy:
+                    TableName: !Ref rssstorage
+            Events:
+                Schedule:
+                    Type: Schedule
+                    Properties:
+                        Schedule: rate(5 minutes)
+            Environment:
+                Variables:
+                    dynamo_region: !Ref 'AWS::Region'
+                    dynamo_table: !Ref rssstorage
+    rssstorage:
+        Type: 'AWS::DynamoDB::Table'
+        Properties:
+            AttributeDefinitions:
+            - AttributeName: 'id'
+              AttributeType: 'S'
+            KeySchema:
+            - AttributeName: 'id'
+              KeyType: 'HASH'
+            ProvisionedThroughput:
+                ReadCapacityUnits: 1
+                WriteCapacityUnits: 1
