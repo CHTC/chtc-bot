@@ -38,4 +38,12 @@ def create_app(config):
                 view_func=command_handler.handle,
             )
 
+        for url, methods, api, api_handler in app.config["APIS"]:
+            app.add_url_rule(
+                url,
+                methods=methods,
+                endpoint=api,
+                view_func=api_handler
+            )
+
         return app

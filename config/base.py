@@ -3,6 +3,7 @@ import datetime
 
 import web.events as events
 import web.commands as commands
+from web import rss
 
 DEBUG = False
 TESTING = False
@@ -44,3 +45,8 @@ SLASH_COMMANDS = {
     "submits": commands.SubmitsCommandHandler(rescrape_timeout=five_minutes),
     "classad_eval": commands.ClassadEvalCommandHandler(),
 }
+
+
+APIS = [
+    [ "/rss", ["POST"], "rss", rss.RSSCommandHandler() ]
+]
