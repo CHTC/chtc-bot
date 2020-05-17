@@ -47,6 +47,4 @@ SLASH_COMMANDS = {
 }
 
 
-APIS = [
-    [ "/rss", ["POST"], "rss", rss.RSSCommandHandler() ]
-]
+APIS = [["/rss", ["POST"], "rss", rss.RSSCommandHandler()]]
