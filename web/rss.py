@@ -18,7 +18,7 @@ class RSSCommandHandler:
             return "no JSON found", 400
 
         for entry in blob:
-            slack.post_message(channel="chtcbot-dev", text=f"{entry}\n")
+            # slack.post_message(channel="chtcbot-dev", text=f"{entry}\n")
             text = self.get_description(entry)
             if text is not None:
                 slack.post_message(channel="#chtcbot-dev", text=text)
@@ -26,9 +26,11 @@ class RSSCommandHandler:
         return "", 200
 
     def get_description(self, entry):
-        link = entry.get("link")
-        title = entry.get("title")
-        description = entry.get("description")
+        link = entry.get('link')
+        title = entry.get('title')
+        # OK, WT_A_F: this is 'description' in the RSS feed and when
+        # parsed by feedreader in the Lambda function!
+        description = entry.get('summary')
         if link is None or title is None or description is None:
             return None
 
