@@ -12,48 +12,56 @@ import requests
 
 
 def handler(event, context):
-    d = feedparser.parse(
-        "https://htcondor-wiki.cs.wisc.edu/index.cgi/timeline.rss?d=90"
-    )
-    feedUpdated = time.mktime(d.feed.updated_parsed)
-
     db = boto3.resource(
         "dynamodb",
         region_name=os.environ["dynamo_region"],
         config=botocore.client.Config(),
     ).Table(os.environ["dynamo_table"])
+
     response = db.query(
-        KeyConditionExpression="id = :feedUpdated",
-        ExpressionAttributeValues={":feedUpdated": "feedUpdated"},
+        KeyConditionExpression="id = :id",
+        ExpressionAttributeValues={":id": "lambda.py"},
     )
     if len(response["Items"]) == 0:
-        feedLastUpdated = 0
-    else:
-        feedLastUpdated = float(response["Items"][0]["ts"])
+        return { "statusCode": 500, "body": json.dumps(f"database not configured"), }
 
-    if feedLastUpdated < feedUpdated:
+    firstResponse = response["Items"][0]
+    lastUpdateSeen = float(firstResponse["ts"])
+    sharedSecret = firstResponse["ss"]
+
+    d = feedparser.parse(
+        "https://htcondor-wiki.cs.wisc.edu/index.cgi/timeline.rss?d=90"
+    )
+    lastUpdate = time.mktime(d.feed.updated_parsed)
+
+    if lastUpdateSeen < lastUpdate:
         db.update_item(
-            Key={"id": "feedUpdated"},
+            Key={"id": "lambda.py"},
             UpdateExpression="set ts = :ts",
-            ExpressionAttributeValues={":ts": str(feedUpdated)},
+            ExpressionAttributeValues={":ts": str(lastUpdate)},
             ReturnValues="UPDATED_NEW",
         )
 
-        # FIXME: Dump the list of all items newer than feedLastUpdated.
+        newEntries = []
+        for entry in d.entries:
+            published = time.mktime(entry.published_parsed)
+            if lastUpdateSeen < published:
+                newEntries.append(entry)
+
         requests.post(
             "https://chtc-bot.herokuapp.com/rss",
-            headers={'Content-Type': 'application/json'},
-            json=d.entries
+            headers={'Content-Type': 'application/json', 'X-Shared-Secret': sharedSecret},
+            json=newEntries
         )
 
         return {
             "statusCode": 200,
-            "body": json.dumps(f"Feed updated at {feedLastUpdated}."),
+            "body": json.dumps(f"Feed updated at {lastUpdate}."),
         }
     else:
         return {
             "statusCode": 200,
-            "body": json.dumps(f"No feed updates since {feedLastUpdated}."),
+            "body": json.dumps(f"No feed updates since {lastUpdate}."),
         }
 
 
