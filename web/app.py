@@ -43,7 +43,7 @@ def create_app(config):
                 url,
                 methods=methods,
                 endpoint=api,
-                view_func=api_handler
+                view_func=api_handler.handle
             )
 
         return app
