@@ -1,10 +1,14 @@
 import os
+improt sys
 import time
 import json
 import botocore, boto3
 
-from libs import feedparser
-from libs import requests
+# This is stupid, but you can't explicitly import module dependencies.
+sys.path.append('./libs')
+
+import feedparser
+import requests
 
 
 def handler(event, context):
@@ -37,7 +41,9 @@ def handler(event, context):
 
         # FIXME: Dump the list of all items newer than feedLastUpdated.
         requests.post(
-            "https://chtc-bot.herokuapp.com/rss", json=json.dumps(response["Items"][0])
+            "https://chtc-bot.herokuapp.com/rss",
+            headers={'Content-Type': 'application/json'},
+            json=d.entries
         )
 
         return {
