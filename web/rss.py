@@ -9,7 +9,7 @@ class RSSCommandHandler:
     def handle(self):
         blob = request.get_json()
         if blob is None:
-            return None
+            return ("JSON!", 401)
 
         slack.post_message(channel="#chtcbot-dev", text=str(blob))
-        return None
+        return ("OK", 200)
