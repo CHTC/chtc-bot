@@ -1,8 +1,8 @@
 from typing import Tuple, List, Collection, Mapping, Any, Union
 
-import re
 import textwrap
 import html
+import shlex
 
 from flask import current_app, request
 
@@ -66,26 +66,23 @@ def generate_classad_eval_reply(user: str, text: str):
 
                 msg_lines.append(f"Ad modified:" if has_printed_an_expr else "Ad:",)
                 msg_lines.append(
-                    "```"
-                    + "\n".join(
-                        textwrap.dedent(html.escape(display_ad, quote=False))
-                        .strip()
-                        .splitlines()
+                    formatting.fixed_block(
+                        "\n".join(
+                            textwrap.dedent(html.escape(display_ad, quote=False))
+                            .strip()
+                            .splitlines()
+                        )
                     )
-                    + "```"
                 )
                 ad_changed = False
 
             expression, evaluated = result
             msg_lines.append(
-                f"`{format_result(expression)}` :arrow_right: `{format_result(evaluated)}`"
+                f"{formatting.fixed(format_result(expression))} :arrow_right: {formatting.fixed(format_result(evaluated))}"
             )
             has_printed_an_expr = True
 
     return "\n".join(filter(None, msg_lines))
-
-
-RE_PARTS = re.compile(r"'(.*?)'")
 
 
 def format_result(result: str):
@@ -96,9 +93,7 @@ def format_result(result: str):
 
 
 def parse(text: str) -> List[Union[classad.ClassAd, classad.ExprTree]]:
-    parts = RE_PARTS.findall(text)
-
-    return [_parse_ad_or_expr(part) for part in parts]
+    return [_parse_ad_or_expr(part) for part in shlex.split(text)]
 
 
 def _parse_ad_or_expr(text: str) -> Union[classad.ClassAd, classad.ExprTree]:
