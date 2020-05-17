@@ -9,6 +9,12 @@ DEBUG = False
 TESTING = False
 PRODUCTION = False
 
+# Database configuration
+SQLALCHEMY_DATABASE_URI = "sqlite:////tmp/dev.db"
+SQLALCHEMY_RECORD_QUERIES = True
+SQLALCHEMY_ECHO = True
+SQLALCHEMY_TRACK_MODIFICATIONS = True
+
 EXECUTOR_TYPE = "thread"
 EXECUTOR_MAX_WORKERS = None  # let it decide
 EXECUTOR_PROPAGATE_EXCEPTIONS = True
@@ -47,6 +53,4 @@ SLASH_COMMANDS = {
 }
 
 
-APIS = [
-    [ "/rss", ["POST"], "rss", rss.RSSCommandHandler() ]
-]
+APIS = [["/rss", ["POST"], "rss", rss.RSSCommandHandler()]]
