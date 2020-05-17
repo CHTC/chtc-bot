@@ -4,6 +4,7 @@ import json
 import botocore, boto3
 
 from libs import feedparser
+from libs import requests
 
 
 def handler(event, context):
@@ -33,6 +34,12 @@ def handler(event, context):
             ExpressionAttributeValues={":ts": str(feedUpdated)},
             ReturnValues="UPDATED_NEW",
         )
+
+        # FIXME: Dump the list of all items newer than feedLastUpdated.
+        requests.post(
+            "https://chtc-bot.herokuapp.com/rss", json=json.dumps(response["Items"][0])
+        )
+
         return {
             "statusCode": 200,
             "body": json.dumps(f"Feed updated at {feedLastUpdated}."),
