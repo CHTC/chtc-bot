@@ -76,6 +76,11 @@ KNOBS_URL = (
             """<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">name</span><span class="o">&gt;=&lt;</span><span class="n">value</span><span class="o">&gt;</span></pre></div>""",
             "```<name>=<value>```",
         ),
+        (
+            formatting.inplace_convert_external_links_to_links,
+            """<a href="https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn=7643" class="new" title="Get HTCondor to build on Modern Fedora without warnings">#7643</a>""",
+            "<https://htcondor-wiki.cs.wisc.edu/index.cgi/tktview?tn=7643|#7643>",
+        ),
     ],
 )
 def test_convert_html_to_markdown(converter, html, expected):
