@@ -1,5 +1,5 @@
 import os
-improt sys
+import sys
 import time
 import json
 import botocore, boto3
