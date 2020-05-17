@@ -18,6 +18,7 @@ class RSSCommandHandler:
             return "no JSON found", 400
 
         for entry in blob:
+            slack.post_message(channel="chtcbot-dev", text=f"{entry}\n")
             text = self.get_description(entry)
             if text is not None:
                 slack.post_message(channel="#chtcbot-dev", text=text)
@@ -25,10 +26,10 @@ class RSSCommandHandler:
         return "", 200
 
     def get_description(self, entry):
+        link = entry.get("link")
         title = entry.get("title")
         description = entry.get("description")
-        link = entry.get("link")
-        if title is None or description is None or link is None:
+        if link is None or title is None or description is None:
             return None
 
         soup = bs4.BeautifulSoup(description, "html.parser")
