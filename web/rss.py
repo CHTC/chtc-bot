@@ -11,5 +11,5 @@ class RSSCommandHandler:
         if blob is None:
             return ("no JSON found", 400)
 
-        # slack.post_message(channel="#chtcbot-dev", text=str(blob))
+        slack.post_message(channel="#chtcbot-dev", text=str(blob))
         return ("", 200)
