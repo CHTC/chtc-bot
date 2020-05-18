@@ -21,7 +21,7 @@ class UserCommandHandler(commands.CommandHandler):
 
         parts = [
             f"Your CHTC Bot user ID is {formatting.fixed(user.id)}.",
-            f"Your Slack user ID is {formatting.fixed(user.slack_id)}.",
+            f"Your Slack user ID is {formatting.fixed(user.user_id)}.",
             formatting.fixed_block(pformat(user.info)),
         ]
 
