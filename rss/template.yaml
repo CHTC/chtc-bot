@@ -10,7 +10,7 @@ Resources:
             Runtime: python3.8
             CodeUri: lambda/
             Description: 'Poll the RSS feed'
-            MemorySize: 128
+            MemorySize: 1024
             Timeout: 60
             Policies:
                 - DynamoDBCrudPolicy:
@@ -24,6 +24,7 @@ Resources:
                 Variables:
                     dynamo_region: !Ref 'AWS::Region'
                     dynamo_table: !Ref rssstorage
+                    bot_rss_api_endpoint: 'https://chtc-bot.herokuapp.com/rss'
     rssstorage:
         Type: 'AWS::DynamoDB::Table'
         Properties:
