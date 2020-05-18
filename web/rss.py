@@ -26,11 +26,11 @@ class RSSCommandHandler:
         return "", 200
 
     def get_description(self, entry):
-        link = entry.get('link')
-        title = entry.get('title')
+        link = entry.get("link")
+        title = entry.get("title")
         # OK, WT_A_F: this is 'description' in the RSS feed and when
         # parsed by feedreader in the Lambda function!
-        description = entry.get('summary')
+        description = entry.get("summary")
         if link is None or title is None or description is None:
             return None
 
