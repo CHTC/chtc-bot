@@ -12,15 +12,16 @@ class UserCommandHandler(commands.CommandHandler):
     def handle(self):
         user_id = request.form.get("user_id")
 
-        executor.submit(self.reply, user_id)
+        executor.submit(self.reply_user_info, user_id)
 
-        return ":eyes: :point_down:"
+        return ":point_left: :eyes:"
 
-    def reply(self, user_id):
+    def reply_user_info(self, user_id):
         user = SlackUser.get_or_create(user_id)
 
         parts = [
-            f"Your CHTC Bot user ID is {formatting.fixed(user.id)}",
+            f"Your CHTC Bot user ID is {formatting.fixed(user.id)}.",
+            f"Your Slack user ID is {formatting.fixed(user.slack_id)}.",
             formatting.fixed_block(pformat(user.info)),
         ]
 
