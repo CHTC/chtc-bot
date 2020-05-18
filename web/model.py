@@ -33,7 +33,7 @@ class SlackUser(db.Model):
 
     @classmethod
     def get_or_create(cls, user_id):
-        user = cls.query.filter(user_id=user_id).first()
+        user = cls.query.filter_by(user_id=user_id).first()
 
         if user is not None:
             return user
