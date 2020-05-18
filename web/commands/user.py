@@ -12,11 +12,11 @@ class UserCommandHandler(commands.CommandHandler):
     def handle(self):
         user_id = request.form.get("user_id")
 
-        executor.submit(self.reply_user_info, user_id)
+        executor.submit(self.reply_with_user_info, user_id)
 
         return ":point_left: :eyes:"
 
-    def reply_user_info(self, user_id):
+    def reply_with_user_info(self, user_id: str):
         user = SlackUser.get_or_create(user_id)
 
         parts = [

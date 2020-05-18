@@ -9,8 +9,8 @@ migrate = Migrate()
 
 
 class SlackUser(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(32), unique=True, nullable=False)
+    id: int = db.Column(db.Integer, primary_key=True)
+    user_id: str = db.Column(db.String(32), unique=True, nullable=False)
 
     def __repr__(self):
         return f"{type(self).__name__}(id={self.id}, user_id={self.user_id})"
@@ -32,7 +32,7 @@ class SlackUser(db.Model):
         return resp["user"]
 
     @classmethod
-    def get_or_create(cls, user_id):
+    def get_or_create(cls, user_id: str) -> "SlackUser":
         user = cls.query.filter_by(user_id=user_id).first()
 
         if user is not None:
