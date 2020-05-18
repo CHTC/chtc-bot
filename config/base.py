@@ -50,6 +50,7 @@ SLASH_COMMANDS = {
     "jobads": commands.JobAdsCommandHandler(rescrape_timeout=five_minutes),
     "submits": commands.SubmitsCommandHandler(rescrape_timeout=five_minutes),
     "classad_eval": commands.ClassadEvalCommandHandler(),
+    "user": commands.UserCommandHandler(),
 }
 
 
