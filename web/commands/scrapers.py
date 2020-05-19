@@ -82,7 +82,7 @@ class WebScrapingCommandHandler(commands.CommandHandler):
                 text = f"{lines[0]}\n{description}"
             else:
                 short = hard_shorten(description, 512)
-                text = f"{lines[0]}\n{short}... [<{full_url}|the rest>]\n"
+                text = f"{lines[0]}\n{short} ... [<{full_url}|the rest>]\n"
             slack.post_message(channel=channel, text=text)
 
     def seen_and_unseen(self, requested_args, channel):
