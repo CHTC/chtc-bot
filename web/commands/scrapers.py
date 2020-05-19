@@ -133,7 +133,7 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
             ]:
                 converter(description)
 
-            text_description = formatting.compress_whitespace(description.text)
+            text_description = format_lists_and_paragraphs(description)
             return f"{formatting.bold(arg)}\n>{text_description}", anchor
         except Exception as e:
             current_app.logger.exception(
@@ -172,7 +172,7 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
                     ]:
                         converter(description)
 
-                    text_description = formatting.compress_whitespace(description.text)
+                    text_description = format_lists_and_paragraphs(description)
                     return f"{formatting.bold(span.text)}\n>{text_description}", anchor
             return None
         except Exception as e:
@@ -249,6 +249,26 @@ def preserve_paragraph_breaks_in(description):
         p.replace_with(f"<br>{p.text}<br>")
 
 
+def format_lists_and_paragraphs(description):
+    replace_lists_in(description)
+    preserve_paragraph_breaks_in(description)
+
+    text_description = formatting.compress_whitespace(description.text)
+    # When a list is the last tag in a list item, we insert one
+    # <br> for end of the last item in the last and another for
+    # end of the containing list item.  Merge them together.
+    text_description = text_description.replace("<br><br>", "<br>")
+    text_description = text_description.replace("<br>", "\n>")
+    text_description = text_description.replace("<space>", " ")
+
+    if text_description.endswith("\n>"):
+        text_description = text_description[0:-1]
+    if text_description.startswith("\n"):
+        text_description = text_description[2:]
+
+    return text_description
+
+
 class SubmitsCommandHandler(WebScrapingCommandHandler):
     def __init__(self, *, rescrape_timeout):
         super().__init__(
@@ -292,22 +312,7 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 ]:
                     converter(description)
 
-                replace_lists_in(description)
-                preserve_paragraph_breaks_in(description)
-
-                text_description = formatting.compress_whitespace(description.text)
-                # When a list is the last tag in a list item, we insert one
-                # <br> for end of the last item in the last and another for
-                # end of the containing list item.  Merge them together.
-                text_description = text_description.replace("<br><br>", "<br>")
-                text_description = text_description.replace("<br>", "\n>")
-                text_description = text_description.replace("<space>", " ")
-
-                if text_description.endswith("\n>"):
-                    text_description = text_description[0:-1]
-                if text_description.startswith("\n"):
-                    text_description = text_description[2:]
-
+                text_description = format_lists_and_paragraphs(description)
                 result = f"{formatting.bold(dt.text)}\n>{text_description}"
                 descriptions.append(result)
 

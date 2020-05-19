@@ -19,3 +19,7 @@ The bot will look up the job ad attribute(s) and echo them to the channel.
 
 The bot will simplify the given expression(s) in the context of the given ClassAd and echo the
 ad (if not empty) and the result(s) to the channel.
+
+`/submits COMMAND [COMMAND_COMMAND ...]`
+
+The bot will look up the submit command(s) and echo them to the channel.
