@@ -18,10 +18,9 @@ class RSSCommandHandler:
             return "no JSON found", 400
 
         for entry in blob:
-            # slack.post_message(channel="chtcbot-dev", text=f"{entry}\n")
             text = self.get_description(entry)
             if text is not None:
-                slack.post_message(channel="#chtcbot-dev", text=text)
+                slack.post_message(channel="#birdwatcher", text=text)
 
         return "", 200
 
