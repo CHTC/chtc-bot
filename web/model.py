@@ -4,6 +4,8 @@ from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 
+from .slack import user_info
+
 db = SQLAlchemy()
 migrate = Migrate()
 
@@ -23,8 +25,7 @@ class SlackUser(db.Model):
         See https://api.slack.com/types/user for details on the user object.
         This method returns the value of the "user" field from that object.
         """
-        client = current_app.config["SLACK_CLIENT"]
-        resp = client.api_call("users.info", user=self.user_id, include_locale=True)
+        resp = user_info(user=self.user_id, include_locale=True)
 
         if not resp["ok"]:
             raise Exception(f"Failed to get info on {self} from the Slack API")

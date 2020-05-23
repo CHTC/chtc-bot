@@ -4,6 +4,10 @@ from web import slack
 def test_post_message_calls_client(config):
     slack.post_message(text="foo")
 
-    config["SLACK_CLIENT"].api_call.assert_called_once_with(
-        "chat.postMessage", text="foo"
-    )
+    config["SLACK_CLIENT"].chat_postMessage.assert_called_once_with(text="foo")
+
+
+def test_user_info_calls_client(config):
+    slack.user_info(user="foo")
+
+    config["SLACK_CLIENT"].user_info.assert_called_once_with(user="foo")
