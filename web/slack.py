@@ -19,7 +19,7 @@ def user_info(*args, **kwargs):
     """
     Get info on a user.
     """
-    return client().user_info(*args, **kwargs)
+    return client().users_info(*args, **kwargs)
 
 
 def notify_error(message):
