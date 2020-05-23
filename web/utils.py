@@ -6,44 +6,109 @@ from typing import (
     Callable,
     Tuple,
     Dict,
-    Collection,
     List,
 )
 from collections.abc import MutableMapping
+
+import multiprocessing
 
 import time
 import datetime
 
 
-class ForgetfulDict:
+class LockableMixin:
+    def __init__(self):
+        self._lock = multiprocessing.RLock()
+
+
+def locked(func):
+    def _(self, *args, **kwargs):
+        with self._lock:
+            return func(self, *args, **kwargs)
+
+    return _
+
+
+class ForgetfulDict(MutableMapping, LockableMixin):
     def __init__(self, *, memory_time: Union[datetime.timedelta, float]):
+        super().__init__()
+
         if isinstance(memory_time, datetime.timedelta):
             memory_time = memory_time.total_seconds()
         self.memory_time = memory_time
 
         self._last_cleanup = time.monotonic()
 
-        self._cache = dict()
-        self._memory = dict()
+        self._cache = {}
+        self._memory = {}
 
+    def now(self):
+        return time.monotonic()
+
+    @locked
     def __getitem__(self, key):
-        now = time.monotonic()
-        self._cleanup(now)
+        self._cleanup()
         return self._cache[key]
 
+    @locked
+    def __iter__(self):
+        # this a slight-of-hand trick; we don't want to keep the dict locked
+        # while the user iterates, so we dump the keys() iterator into a list,
+        # then return an iterator over that list
+        self._cleanup()
+        return iter(list(self._cache.keys()))
+
+    @locked
     def __setitem__(self, key, value):
-        now = time.monotonic()
-        self._cleanup(now)
-        if key not in self._cache:
-            self._memory[key] = now
+        self._memory[key] = self.now()
         self._cache[key] = value
 
-    def __contains__(self, key):
-        now = time.monotonic()
-        self._cleanup(now)
-        return key in self._cache
+    @locked
+    def set(self, key, value, update_existing: bool = True) -> bool:
+        """
+        Set the given key to the given value.
 
-    def _cleanup(self, now: float):
+        If ``update_existing`` is
+        ``True`` and the key is already in the mapping,
+        this function **will** set it again, refreshing the timer
+        (this is the default behavior).
+
+        Parameters
+        ----------
+        key
+            The key to set.
+        value
+            The value to set.
+        update_existing
+            If ``False``, and the key already exists in the mapping, this
+            function will do nothing (and return ``False``).
+
+        Returns
+        -------
+        bool
+            ``True`` if the key-value pair was set.
+            ``False`` if the key-value pair was not set.
+        """
+        if not update_existing and key in self:
+            return False
+
+        self[key] = value
+        return True
+
+    @locked
+    def __delitem__(self, key):
+        del self._memory[key]
+        del self._cache[key]
+
+    @locked
+    def __len__(self):
+        self._cleanup()
+        return len(self._cache)
+
+    @locked
+    def _cleanup(self):
+        now = self.now()
+
         if self._last_cleanup + self.memory_time > now:
             return
 
