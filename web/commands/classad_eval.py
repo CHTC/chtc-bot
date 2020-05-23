@@ -1,8 +1,8 @@
-from typing import Tuple, List, Collection, Mapping, Any
+from typing import Tuple, List, Collection, Mapping, Any, Union
 
-import re
 import textwrap
 import html
+import shlex
 
 from flask import current_app, request
 
@@ -34,42 +34,55 @@ def classad_eval_reply(channel: str, user: str, text: str):
 
 def generate_classad_eval_reply(user: str, text: str):
     try:
-        ad, exprs = parse(text)
+        ads_and_exprs = parse(text)
     except Exception as e:
         current_app.logger.exception(
             f"Failed to parse ad or expressions (raw: {text}): {e}"
         )
-        return f"Failed to parse ad or expressions: {e}"
+        return html.escape(f"Failed to parse ad or expressions: {e}", quote=False)
 
     try:
-        results = evaluate(ad, exprs)
+        results = evaluate(ads_and_exprs)
     except Exception as e:
-        current_app.logger.exception(
-            f"Failed to evaluate an expression (ad: {repr(ad)}, expressions: {[exprs]}): {e}"
-        )
+        current_app.logger.exception(f"Failed to evaluate an expression: {e}")
         return html.escape(f"Failed to evaluate an expression: {e}", quote=False)
 
-    prefix = f"<@{user}> asked me to evaluate {'a ' if len(exprs) == 1 else ''}ClassAd expression{formatting.plural(exprs)}"
-    if len(ad) != 0:
-        msg_lines = [
-            f"{prefix} in the context of this ad:",
-            "```",
-            *textwrap.dedent(html.escape(str(ad), quote=False)).strip().splitlines(),
-            "```",
-            f"Expression{formatting.plural(results)}:",
-        ]
-    else:
-        msg_lines = [f"{prefix}:"]
+    msg_lines = [f"<@{user}> asked me to do ClassAd evaluation:"]
 
-    msg_lines.extend(
-        f"`{format_result(k)}` :arrow_right: `{format_result(v)}`"
-        for k, v in results.items()
-    )
+    ad_changed = False
+    has_printed_an_expr = False
+    last_ad = classad.ClassAd()
+    for idx, result in enumerate(results):
+        if isinstance(result, classad.ClassAd):
+            ad_changed = True
+            last_ad = result
+        else:
+            if ad_changed:
+                ad_is_short = len(last_ad) <= 3 and len(str(last_ad)) <= 80
+                if ad_is_short:
+                    display_ad = repr(last_ad)
+                else:
+                    display_ad = str(last_ad)
+
+                msg_lines.append(f"Ad modified:" if has_printed_an_expr else "Ad:",)
+                msg_lines.append(
+                    formatting.fixed_block(
+                        "\n".join(
+                            textwrap.dedent(html.escape(display_ad, quote=False))
+                            .strip()
+                            .splitlines()
+                        )
+                    )
+                )
+                ad_changed = False
+
+            expression, evaluated = result
+            msg_lines.append(
+                f"{formatting.fixed(format_result(expression))} :arrow_right: {formatting.fixed(format_result(evaluated))}"
+            )
+            has_printed_an_expr = True
 
     return "\n".join(filter(None, msg_lines))
-
-
-RE_PARTS = re.compile(r"'(.*?)'")
 
 
 def format_result(result: str):
@@ -79,22 +92,38 @@ def format_result(result: str):
     )
 
 
-def parse(text: str) -> Tuple[classad.ClassAd, List[classad.ExprTree]]:
-    ad_text, *exprs_text = RE_PARTS.findall(text)
+def parse(text: str) -> List[Union[classad.ClassAd, classad.ExprTree]]:
+    return [_parse_ad_or_expr(part) for part in shlex.split(text)]
 
+
+def _parse_ad_or_expr(text: str) -> Union[classad.ClassAd, classad.ExprTree]:
     try:
-        ad = classad.ClassAd(ad_text)
+        return _try_parse_ad(text)
+    except SyntaxError:
+        return classad.ExprTree(text)
+
+
+def _try_parse_ad(text: str) -> classad.ClassAd:
+    try:
+        return classad.ClassAd(text)
     except SyntaxError:
         # it doesn't look like an ad... maybe they missed the wrapping braces?
-        ad = classad.ClassAd(f"[{ad_text}]")
-
-    exprs = [classad.ExprTree(s) for s in exprs_text]
-
-    return ad, exprs
+        return classad.ClassAd(f"[{text}]")
 
 
 def evaluate(
-    ad: classad.ClassAd, exprs: Collection[classad.ExprTree]
-) -> Mapping[classad.ExprTree, Any]:
-    """Evaluate each expression in the context of the ad."""
-    return {expr: expr.simplify(ad) for expr in exprs}
+    ads_and_exprs,
+) -> List[Union[classad.ClassAd, Tuple[classad.ExprTree, Any]]]:
+    results = []
+    base_ad = classad.ClassAd()
+    for ad_or_expr in ads_and_exprs:
+        if isinstance(ad_or_expr, classad.ClassAd):
+            base_ad.update(ad_or_expr)
+
+            new_ad = classad.ClassAd()
+            new_ad.update(base_ad)
+            results.append(new_ad)
+        else:
+            results.append((ad_or_expr, ad_or_expr.simplify(base_ad)))
+
+    return results

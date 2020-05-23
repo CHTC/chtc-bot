@@ -18,6 +18,11 @@ def fixed(text):
     return f"`{text}`"
 
 
+def fixed_block(text):
+    """Wrap text in markdown block fixed text markers."""
+    return f"```\n{text}\n```"
+
+
 def link(url, text=None):
     """Construct a Slack-encoded link. If text is None, the raw URL is returned."""
     if text is not None:
@@ -67,3 +72,9 @@ def inplace_convert_code_block_to_code_block(
     codes = soup.select(selector)
     for code in codes:
         code.replace_with(f"```{code.text}```".replace("\n", "<br />"))
+
+
+def inplace_convert_external_links_to_links(soup):
+    for href in soup.select("a"):
+        href.string = link(href.get("href"), href.text)
+        href.unwrap()

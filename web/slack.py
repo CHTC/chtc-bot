@@ -1,13 +1,25 @@
 from flask import current_app
 
 
+def client():
+    """
+    Get the Slack client from the app config.
+    """
+    return current_app.config["SLACK_CLIENT"]
+
+
 def post_message(*args, **kwargs):
     """
     Post a message to Slack.
     """
-    client = current_app.config["SLACK_CLIENT"]
+    return client().chat_postMessage(*args, **kwargs)
 
-    client.api_call("chat.postMessage", *args, **kwargs)
+
+def user_info(*args, **kwargs):
+    """
+    Get info on a user.
+    """
+    return client().users_info(*args, **kwargs)
 
 
 def notify_error(message):

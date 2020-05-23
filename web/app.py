@@ -5,7 +5,6 @@ from flask import Flask
 from slackeventsapi import SlackEventAdapter
 
 from . import events
-from .executor import executor
 
 
 def create_app(config):
@@ -16,7 +15,12 @@ def create_app(config):
     )
 
     with app.app_context():
+        from .executor import executor
+        from .model import db, migrate
+
         executor.init_app(app)
+        db.init_app(app)
+        migrate.init_app(app, db)
 
         # hook up the low-level raw event handlers; high-level config is done in base.py
         if app.config.get("SLACK_SIGNING_SECRET") is not None:
@@ -36,6 +40,13 @@ def create_app(config):
                 methods=["POST"],
                 endpoint=command,
                 view_func=command_handler.handle,
+            )
+
+        # Turn off until we do something vaguely secure here or are
+        # actively working on this again.
+        for url, methods, api, api_handler in app.config["APIS"]:
+            app.add_url_rule(
+                url, methods=methods, endpoint=api, view_func=api_handler.handle
             )
 
         return app

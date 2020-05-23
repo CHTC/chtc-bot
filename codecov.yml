@@ -11,7 +11,7 @@ coverage:
         threshold: 20
         only_pulls: true
         
-    patch: off
+    patch:
       default:
         target: auto
         threshold: 50

@@ -14,6 +14,12 @@ from ..utils import ForgetfulDict
 from .. import http, slack, formatting, utils
 
 
+def hard_shorten(text, limit):
+    while text[limit] != " ":
+        limit -= 1
+    return text[0:limit]
+
+
 class WebScrapingCommandHandler(commands.CommandHandler):
     def __init__(self, *, rescrape_timeout, url, word):
         self.url = url
@@ -67,8 +73,17 @@ class WebScrapingCommandHandler(commands.CommandHandler):
                 + f".  Perhaps {p1} misspelled, or {p2} exist?"
             )
 
-        lines.extend(v + "\n" for v in good.values())
-        slack.post_message(channel=channel, text="\n".join(lines))
+        if len(good) == 0:
+            slack.post_message(channel=channel, text="\n".join(lines))
+
+        for arg, (description, anchor) in good.items():
+            full_url = f"{self.url}#{anchor}"
+            if len(description) < 512:
+                text = f"{lines[0]}\n{description}"
+            else:
+                short = hard_shorten(description, 512)
+                text = f"{lines[0]}\n{short} ... [<{full_url}|the rest>]\n"
+            slack.post_message(channel=channel, text=text)
 
     def seen_and_unseen(self, requested_args, channel):
         seen, unseen = utils.partition_collection(
@@ -102,6 +117,7 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
         try:
             header = page_soup.find("span", id=arg)
 
+            anchor = header["id"]
             description = header.parent.find_next("dd")
             for converter in [
                 formatting.inplace_convert_em_to_underscores,
@@ -114,8 +130,8 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
             ]:
                 converter(description)
 
-            text_description = formatting.compress_whitespace(description.text)
-            return f"{formatting.bold(arg)}\n>{text_description}"
+            text_description = format_lists_and_paragraphs(description)
+            return f"{formatting.bold(arg)}\n>{text_description}", anchor
         except Exception as e:
             current_app.logger.exception(
                 f"Error while trying to find {self.word} {arg}: {e}"
@@ -140,6 +156,7 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
 
             for span in spans:
                 if span.text.lower() == arg.lower():
+                    anchor = span.find_previous("span", class_="target")["id"]
                     description = span.parent.parent.find_next("dd")
                     for converter in [
                         formatting.inplace_convert_em_to_underscores,
@@ -152,14 +169,101 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
                     ]:
                         converter(description)
 
-                    text_description = formatting.compress_whitespace(description.text)
-                    return f"{formatting.bold(span.text)}\n>{text_description}"
+                    text_description = format_lists_and_paragraphs(description)
+                    return f"{formatting.bold(span.text)}\n>{text_description}", anchor
             return None
         except Exception as e:
             current_app.logger.exception(
                 f"Error while trying to find {self.word} {arg}: {e}"
             )
             return None
+
+
+def hard_wrap_line(line, spaces):
+    rv = ""
+    length = 0
+    for word in line.split():
+        if length > 80:
+            rv += f"<br>{spaces}"
+            length = 0
+        length += len(word.replace("<space>", " ")) + 1
+        rv += f"{word} "
+    return rv[0:-1]
+
+
+def hard_wrap(text, spaces):
+    rv = ""
+    lines = text.split("<br>")
+    for line in lines:
+        rv += hard_wrap_line(line, spaces) + "<br>"
+    return rv[0:-4]
+
+
+# BeautifulSoup assumes that you always want to be able to traverse the whole
+# soup from any tag in it, so you have to do your own recursion if you care
+# about tag boundaries.
+#
+# If we find an example of a list nested under an ordered list item, we can
+# convert depth to the spaces string used to do word-wrapping.
+def replace_lists_in(description, depth=0, ordered=False):
+    try:
+        children = description.children
+    except AttributeError:
+        return
+
+    number = 1
+    for child in children:
+        if child.name == "ul":
+            replace_lists_in(child, depth + 1)
+
+            child.replace_with(f"<br>{child.text}")
+        elif child.name == "ol":
+            replace_lists_in(child, depth + 1, True)
+
+            child.replace_with(f"<br>{child.text}")
+        else:
+            replace_lists_in(child, depth)
+
+        if child.name == "li":
+            indent = "<space><space><space><space>"
+
+            spaces = ""
+            for i in range(0, depth):
+                spaces += indent
+
+            bullet = "\u2022"
+            if ordered:
+                indent += "<space>"
+                bullet = f"{number}."
+                number += 1
+
+            hw = hard_wrap(child.text, f"{spaces}{indent}")
+            child.replace_with(f"{spaces}{bullet} {hw}<br>")
+
+
+def preserve_paragraph_breaks_in(description):
+    for p in description.find_all("p"):
+        p.replace_with(f"<br>{p.text}<br>")
+
+
+def format_lists_and_paragraphs(description):
+    replace_lists_in(description)
+    preserve_paragraph_breaks_in(description)
+
+    text_description = formatting.compress_whitespace(description.text)
+    # When a list is the last tag in a list item, we insert one
+    # <br> for end of the last item in the last and another for
+    # end of the containing list item.  Merge them together.
+    text_description = text_description.replace("<br><br>", "<br>")
+    text_description = text_description.replace("<br>", "\n>")
+    text_description = text_description.replace("<space>", " ")
+
+    if text_description.endswith("\n>"):
+        text_description = text_description[0:-1]
+    if text_description.startswith("\n"):
+        text_description = text_description[2:]
+
+    return text_description
 
 
 class SubmitsCommandHandler(WebScrapingCommandHandler):
@@ -185,8 +289,14 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
 
             dts = start.find_all_next(text_matches)
 
-            whole_description = None
+            # We'll assume that all of the subsequent descriptions are
+            # immediately subsequent and that the first anchor is the
+            # correct one to use if the description is shortened.
+            anchor = None
+            descriptions = []
             for dt in dts:
+                if anchor is None:
+                    anchor = dt.find_previous("span", class_="target")["id"]
                 description = dt.find_next("dd")
                 for converter in [
                     formatting.inplace_convert_em_to_underscores,
@@ -199,28 +309,16 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 ]:
                     converter(description)
 
-                for list in description.find_all("ol"):
-                    replacement = "<br>"
-                    for li in list.select("ol > li"):
-                        replacement += f"\u2022 {li.text}<br>"
-                    list.replace_with(replacement)
-
-                for list in description.find_all("ul"):
-                    replacement = "<br>"
-                    for li in list.select("ul > li"):
-                        replacement += f"\u2022 {li.text}<br>"
-                    list.replace_with(replacement)
-
-                text_description = formatting.compress_whitespace(description.text)
-                text_description = text_description.replace("<br>", "\n>")
-
+                text_description = format_lists_and_paragraphs(description)
                 result = f"{formatting.bold(dt.text)}\n>{text_description}"
-                if whole_description is None:
-                    whole_description = result
-                else:
-                    whole_description += f"\n{result}"
+                descriptions.append(result)
 
-            return whole_description
+            if len(descriptions) == 0:
+                return None
+            elif len(descriptions) == 1:
+                return (descriptions[0], anchor)
+            else:
+                return ("\n".join(descriptions), anchor)
 
         except Exception as e:
             current_app.logger.exception(
