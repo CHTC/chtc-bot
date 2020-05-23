@@ -6,7 +6,6 @@ from typing import (
     Callable,
     Tuple,
     Dict,
-    Collection,
     List,
 )
 from collections.abc import MutableMapping
@@ -65,14 +64,32 @@ class ForgetfulDict(MutableMapping, LockableMixin):
         self._cache[key] = value
 
     @locked
-    def set_if_unset(self, key, value) -> bool:
+    def set(self, key, value, update_existing: bool = True) -> bool:
         """
-        Set the given key to the given value if the key was not already set.
+        Set the given key to the given value.
 
-        Returns ``True`` if the key was set (and therefore was not already in the mapping).
-        Returns ``False`` if they key was not set (and therefore was already in the mapping).
+        If ``update_existing`` is
+        ``True`` and the key is already in the mapping,
+        this function **will** set it again, refreshing the timer
+        (this is the default behavior).
+
+        Parameters
+        ----------
+        key
+            The key to set.
+        value
+            The value to set.
+        update_existing
+            If ``False``, and the key already exists in the mapping, this
+            function will do nothing (and return ``False``).
+
+        Returns
+        -------
+        bool
+            ``True`` if the key-value pair was set.
+            ``False`` if the key-value pair was not set.
         """
-        if key in self:
+        if not update_existing and key in self:
             return False
 
         self[key] = value

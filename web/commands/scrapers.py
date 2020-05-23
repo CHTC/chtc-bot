@@ -88,8 +88,8 @@ class WebScrapingCommandHandler(commands.CommandHandler):
     def seen_and_unseen(self, requested_args, channel):
         seen, unseen = utils.partition_collection(
             requested_args,
-            key=lambda arg: not self.recently_scraped.set_if_unset(
-                (arg.upper(), channel), None
+            key=lambda arg: not self.recently_scraped.set(
+                (arg.upper(), channel), None, update_existing=False
             ),
         )
 

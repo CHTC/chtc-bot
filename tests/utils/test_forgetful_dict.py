@@ -75,16 +75,32 @@ def test_constructor_converts_timedeltas():
     assert d.memory_time == 1
 
 
-def test_set_if_unset_with_key_missing():
+def test_set_update_with_key_missing():
     d = ForgetfulDict(memory_time=1)
 
-    assert d.set_if_unset("key", None)
+    assert d.set("key", None, update_existing=True)
 
 
-def test_set_if_unset_with_key_found():
+def test_set_update_with_key_found():
     d = ForgetfulDict(memory_time=1)
 
     d["key"] = "This"
 
-    assert not d.set_if_unset("key", "Nope")
+    assert d.set("key", "Yes", update_existing=True)
+    assert d["key"] == "Yes"
+
+
+def test_set_no_update_with_key_found():
+    d = ForgetfulDict(memory_time=1)
+
+    d["key"] = "This"
+
+    assert not d.set("key", "Nope", update_existing=False)
     assert d["key"] == "This"
+
+
+def test_set_no_update_with_key_missing():
+    d = ForgetfulDict(memory_time=1)
+
+    assert d.set("key", "Yes", update_existing=False)
+    assert d["key"] == "Yes"
