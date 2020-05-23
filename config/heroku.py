@@ -1,6 +1,6 @@
 import os
 
-from slackclient import SlackClient
+from slack import WebClient
 
 from config.base import *
 
@@ -14,7 +14,7 @@ SQLALCHEMY_ECHO = False
 
 # Slack credentials
 SLACK_SIGNING_SECRET = os.environ["SLACK_SIGNING_SECRET"]
-SLACK_CLIENT = SlackClient(os.environ["SLACK_BOT_TOKEN"])
+SLACK_CLIENT = WebClient(token=os.environ["SLACK_BOT_TOKEN"])
 
 # RSS "API" credentials
 RSS_SHARED_SECRET = os.environ["RSS_SHARED_SECRET"]
