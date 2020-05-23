@@ -1,10 +1,9 @@
-from flask import request
-from flask import current_app
-
-from . import slack
-
 import bs4
+
+from flask import request, current_app
+
 from . import formatting
+from . import slack
 
 
 class RSSCommandHandler:

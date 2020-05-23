@@ -13,4 +13,3 @@ and `flask db upgrade` to apply the migration.
 **Commit migrations to git.**
 
 The production database is automatically upgraded in `release-tasks.sh`
-

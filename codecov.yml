@@ -2,15 +2,15 @@ coverage:
   range: 50..100
   round: down
   precision: 0
-  
+
   status:
-    
+
     project:
       default:
         target: auto
         threshold: 20
         only_pulls: true
-        
+
     patch:
       default:
         target: auto
