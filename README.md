@@ -23,3 +23,13 @@ ad (if not empty) and the result(s) to the channel.
 `/submits COMMAND [COMMAND_COMMAND ...]`
 
 The bot will look up the submit command(s) and echo them to the channel.
+
+
+## Development
+
+Once you've cloned the repository, run `pip install -r requirements-dev.txt`
+to install the development packages.
+
+This repository uses `pre-commit`.
+After installing development dependencies, run `pre-commit install`.
+**Do not commit before installing `pre-commit`!**

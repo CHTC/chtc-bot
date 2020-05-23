@@ -1,7 +1,7 @@
 """empty message
 
 Revision ID: 8a3dcea7f1b9
-Revises: 
+Revises:
 Create Date: 2020-05-17 22:44:05.698552
 
 """

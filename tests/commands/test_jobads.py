@@ -27,35 +27,35 @@ ATTRS_HTML = textwrap.dedent(
     <dt><code class="docutils literal notranslate"><span class="pre">AcctGroup</span></code></dt>
     <dd>The accounting group name, as set in the submit description file via
     the
-    <strong>accounting_group</strong> <span class="target" id="index-5"></span> 
+    <strong>accounting_group</strong> <span class="target" id="index-5"></span>
     command. This attribute is only present if an accounting group was
     requested by the submission. See the <a class="reference internal" href="../admin-manual/user-priorities-negotiation.html"><span class="doc">User Priorities and Negotiation</span></a> section
     for more information about accounting groups.
-    <span class="target" id="index-6"></span> 
+    <span class="target" id="index-6"></span>
     <span class="target" id="index-7"></span> </dd>
     <dt><code class="docutils literal notranslate"><span class="pre">AcctGroupUser</span></code></dt>
     <dd>The user name associated with the accounting group. This attribute
     is only present if an accounting group was requested by the
-    submission. <span class="target" id="index-8"></span> 
+    submission. <span class="target" id="index-8"></span>
     <span class="target" id="index-9"></span> </dd>
     <dt><code class="docutils literal notranslate"><span class="pre">AllRemoteHosts</span></code></dt>
     <dd>String containing a comma-separated list of all the remote machines
     running a parallel or mpi universe job.
-    <span class="target" id="index-10"></span> 
+    <span class="target" id="index-10"></span>
     <span class="target" id="index-11"></span> </dd>
     <dt><code class="docutils literal notranslate"><span class="pre">Args</span></code></dt>
     <dd>A string representing the command line arguments passed to the job,
     when those arguments are specified using the old syntax, as
     specified in
     the <a class="reference internal" href="../man-pages/condor_submit.html"><span class="doc">condor_submit</span></a> section.
-    <span class="target" id="index-12"></span> 
+    <span class="target" id="index-12"></span>
     <span class="target" id="index-13"></span> </dd>
     <dt><code class="docutils literal notranslate"><span class="pre">Arguments</span></code></dt>
     <dd>A string representing the command line arguments passed to the job,
     when those arguments are specified using the new syntax, as
     specified in
     the <a class="reference internal" href="../man-pages/condor_submit.html"><span class="doc">condor_submit</span></a> section.
-    <span class="target" id="index-14"></span> 
+    <span class="target" id="index-14"></span>
     <span class="target" id="index-15"></span> </dd>
     """
 ).strip()

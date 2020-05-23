@@ -205,7 +205,7 @@ SUBMITS_HTML = textwrap.dedent(
     </pre></div>
     </div>
     <p class="last">If the environment is set with the
-    <strong>environment</strong> <span class="target" id="index-16"></span> 
+    <strong>environment</strong> <span class="target" id="index-16"></span>
     command and <strong>getenv</strong> <span class="target" id="index-17"></span>  is
     also set to true, values specified with <strong>environment</strong> override
     values in the submitter’s environment (regardless of the order of

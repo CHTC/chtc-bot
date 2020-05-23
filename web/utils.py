@@ -23,8 +23,8 @@ class ForgetfulDict:
 
         self._last_cleanup = time.monotonic()
 
-        self._cache = dict()
-        self._memory = dict()
+        self._cache = {}
+        self._memory = {}
 
     def __getitem__(self, key):
         now = time.monotonic()

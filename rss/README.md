@@ -11,4 +11,3 @@ whose `id` is `lambda.py`.  To that item, add `last_update_seen`
 past which events will be considered new; and `rss_shared_secret`,
 the shared secret you added to the environment (as `RSS_SHARED_SECRET`)
 in Heroku.
-
