@@ -45,18 +45,19 @@ class ScheduleCommandHandler(commands.CommandHandler):
 
         replies = []
         for status, users in users_by_status.items():
-            if len(users) == 1:
-                user, link = users[0]
-                line = f"<{link}|{user}> is {formatting.bold(ing)}."
+            count = len(users)
+            if count == 1:
+                user, link, hours = users[0]
+                line = f"<{link}|{user}> is {formatting.bold(status)}."
                 replies.append(line)
             else:
-                line = f"{count} people are {formatting.bold(ing)}: "
-                for user, link in users:
+                line = f"{count} people are {formatting.bold(status)}: "
+                for user, link, hours in users:
                     line = f"{line}<{link}|{user}>, "
                 replies.append(line[:-2])
         reply = "\n".join(replies)
 
-        # Why does channel=user work in handle() but not here?
+        # FIXME: Why does channel=user work in handle() but not here?
         slack.post_message(channel="#chtcbot-dev", text=reply)
 
     def get_soup(self):
@@ -78,7 +79,7 @@ class ScheduleCommandHandler(commands.CommandHandler):
             "Vacation": "on vacation",
             "Furlough": "furloughed",
             "Sick": "out sick",
-            "Sick:4": "out sick",
+            "Sick:4": "out sick (half day)",
             "Office (Home)": "working",
             "Office (WFH)": "working",
         }
@@ -93,13 +94,15 @@ class ScheduleCommandHandler(commands.CommandHandler):
                 continue
 
             td = row.find_all("td")[dayofweek + 1]
-            status = td.text.split("\n")[0]
+            fields = td.text.split("\n")
+            status = fields[0]
+            hours = fields[1] if len(fields) > 1 and len(fields[1]) > 0 else None
             status = (
                 phrasing.get(status) if phrasing.get(status) is not None else status
             )
 
             if users_by_status.get(status) is None:
                 users_by_status[status] = []
-            users_by_status[status].append((user, link))
+            users_by_status[status].append((user, link, hours))
 
         return users_by_status
