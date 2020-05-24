@@ -4,6 +4,7 @@ from flask import request
 from flask import current_app
 
 import bs4
+import html
 import datetime
 
 from . import commands
@@ -47,10 +48,10 @@ class ScheduleCommandHandler(commands.CommandHandler):
         else:
             replies = []
             for status, users in users_by_status.items():
-                line = f"{len(users)} people are {formatting.bold(status)}:"
+                line = f"{len(users)} people are {formatting.bold(status)}: "
                 for user, link in users:
-                    line = f"{line} <{link}|{user}>"
-                replies.append(line)
+                    line = f"{line}<{link}|{user}>, "
+                replies.append(line[:-2])
             reply = "\n".join(replies)
 
         # Why does channel=user work in handle() but not here?
