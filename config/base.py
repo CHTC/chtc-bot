@@ -57,6 +57,3 @@ SLASH_COMMANDS = {
 
 
 APIS = [["/rss", ["POST"], "rss", rss.RSSCommandHandler()]]
-
-# schedule command credentials
-SCHEDULE_COMMAND_PASSWORD = os.environ["SCHEDULE_COMMAND_PASSWORD"]
