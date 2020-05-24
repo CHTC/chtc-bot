@@ -41,32 +41,19 @@ class ScheduleCommandHandler(commands.CommandHandler):
             return ":thinking_face: :calendar:"
 
     def reply(self, user: str, args: List[str], dayofweek):
-        phrasing = {
-            "Office": "working",
-            "Travel": "travelling",
-            "Vacation": "on vacation",
-            "Furlough": "furloughed",
-            "Sick": "out sick",
-            "Office (Home)": "working",
-            "Office (WFH)": "working",
-        }
         users_by_status = self.get_users_by_status(args, dayofweek, self.get_soup())
 
         replies = []
         for status, users in users_by_status.items():
-            count = len(users)
-            ing = phrasing.get(status) if phrasing.get(status) is not None else status
-
-            if count == 1:
+            if len(users) == 1:
                 user, link = users[0]
-                line = f"Only <{link}|{user}> is {formatting.bold(ing)}."
+                line = f"<{link}|{user}> is {formatting.bold(ing)}."
                 replies.append(line)
             else:
                 line = f"{count} people are {formatting.bold(ing)}: "
                 for user, link in users:
                     line = f"{line}<{link}|{user}>, "
                 replies.append(line[:-2])
-
         reply = "\n".join(replies)
 
         # Why does channel=user work in handle() but not here?
@@ -85,6 +72,17 @@ class ScheduleCommandHandler(commands.CommandHandler):
         schedule = calendar.find_next("table")
         rows = schedule.find_all("tr")
 
+        phrasing = {
+            "Office": "working",
+            "Travel": "travelling",
+            "Vacation": "on vacation",
+            "Furlough": "furloughed",
+            "Sick": "out sick",
+            "Sick:4": "out sick",
+            "Office (Home)": "working",
+            "Office (WFH)": "working",
+        }
+
         users_by_status = {}
         for row in rows[2:]:
             href = row.select("td > a")[0]
@@ -96,6 +94,9 @@ class ScheduleCommandHandler(commands.CommandHandler):
 
             td = row.find_all("td")[dayofweek + 1]
             status = td.text.split("\n")[0]
+            status = (
+                phrasing.get(status) if phrasing.get(status) is not None else status
+            )
 
             if users_by_status.get(status) is None:
                 users_by_status[status] = []
