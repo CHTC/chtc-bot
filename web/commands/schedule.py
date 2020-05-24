@@ -26,13 +26,13 @@ class ScheduleCommandHandler(commands.CommandHandler):
         args = (
             []
             if raw_args is None or len(raw_args) == 0
-            else html.unescape(raw_args).split(",")
+            else [arg.strip() for arg in html.unescape(raw_args).split(",")]
         )
 
         dayofweek = datetime.datetime.today().weekday()
         if dayofweek >= 5:
             slack.post_message(channel=user, text="It's not a weekday.")
-            # For testing.
+            # FIXME: for testing.
             dayofweek = 4
             executor.submit(self.reply, user, args, dayofweek)
             return ":thinking_face: :calendar:"
@@ -41,10 +41,15 @@ class ScheduleCommandHandler(commands.CommandHandler):
             return ":thinking_face: :calendar:"
 
     def reply(self, user: str, args: List[str], dayofweek):
-        users_by_status = self.get_users_by_status(args, dayofweek)
+        users_by_status = self.get_users_by_status(args, dayofweek, self.get_soup())
 
+        # FIXME: do we want to reply differently for 'everyone',
+        # especially considering the ability to ask for a specific subset?
         if len(users_by_status.keys()) == 1:
-            reply = "Everyone is {formatting.bold(status)}."
+            if len(args) == 1:
+                reply = f"{args[0]} is {formatting.bold(status)}."
+            else:
+                reply = f"Everyone is {formatting.bold(status)}."
         else:
             replies = []
             for status, users in users_by_status.items():
@@ -57,13 +62,15 @@ class ScheduleCommandHandler(commands.CommandHandler):
         # Why does channel=user work in handle() but not here?
         slack.post_message(channel="#chtcbot-dev", text=reply)
 
-    def get_users_by_status(self, users: List[str], dayofweek: int):
+    def get_soup(self):
         username = "condor-team"
         password = current_app.config["SCHEDULE_COMMAND_PASSWORD"]
 
         response = http.cached_get_url(self.url, auth=(username, password))
         soup = bs4.BeautifulSoup(response.text, "html.parser")
+        return soup
 
+    def get_users_by_status(self, users: List[str], dayofweek: int, soup):
         calendar = soup.select("table.calmonth")[0]
         schedule = calendar.find_next("table")
         rows = schedule.find_all("tr")
