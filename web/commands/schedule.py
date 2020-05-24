@@ -41,23 +41,33 @@ class ScheduleCommandHandler(commands.CommandHandler):
             return ":thinking_face: :calendar:"
 
     def reply(self, user: str, args: List[str], dayofweek):
+        phrasing = {
+            "Office": "working",
+            "Travel": "travelling",
+            "Vacation": "on vacation",
+            "Furlough": "furloughed",
+            "Sick": "out sick",
+            "Office (Home)": "working",
+            "Office (WFH)": "working",
+        }
         users_by_status = self.get_users_by_status(args, dayofweek, self.get_soup())
 
-        # FIXME: do we want to reply differently for 'everyone',
-        # especially considering the ability to ask for a specific subset?
-        if len(users_by_status.keys()) == 1:
-            if len(args) == 1:
-                reply = f"{args[0]} is {formatting.bold(status)}."
+        replies = []
+        for status, users in users_by_status.items():
+            count = len(users)
+            ing = phrasing.get(status) if phrasing.get(status) is not None else status
+
+            if count == 1:
+                user, link = users[0]
+                line = f"Only <{link}|{user}> is {formatting.bold(ing)}."
+                replies.append(line)
             else:
-                reply = f"Everyone is {formatting.bold(status)}."
-        else:
-            replies = []
-            for status, users in users_by_status.items():
-                line = f"{len(users)} people are {formatting.bold(status)}: "
+                line = f"{count} people are {formatting.bold(ing)}: "
                 for user, link in users:
                     line = f"{line}<{link}|{user}>, "
                 replies.append(line[:-2])
-            reply = "\n".join(replies)
+
+        reply = "\n".join(replies)
 
         # Why does channel=user work in handle() but not here?
         slack.post_message(channel="#chtcbot-dev", text=reply)
