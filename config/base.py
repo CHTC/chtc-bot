@@ -1,3 +1,4 @@
+import os
 import re
 import datetime
 
@@ -51,7 +52,11 @@ SLASH_COMMANDS = {
     "submits": commands.SubmitsCommandHandler(rescrape_timeout=five_minutes),
     "classad_eval": commands.ClassadEvalCommandHandler(),
     "user": commands.UserCommandHandler(),
+    "schedule": commands.ScheduleCommandHandler(),
 }
 
 
 APIS = [["/rss", ["POST"], "rss", rss.RSSCommandHandler()]]
+
+# schedule command credentials
+SCHEDULE_COMMAND_PASSWORD = os.environ["SCHEDULE_COMMAND_PASSWORD"]
