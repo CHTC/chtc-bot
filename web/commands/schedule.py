@@ -53,7 +53,8 @@ class ScheduleCommandHandler(commands.CommandHandler):
                 replies.append(line)
             reply = "\n".join(replies)
 
-        slack.post_message(channel=user, text=reply)
+        # Why does channel=user work in handle() but not here?
+        slack.post_message(channel="#chtcbot-dev", text=reply)
 
     def get_users_by_status(self, users: List[str], dayofweek: int):
         username = "condor-team"
