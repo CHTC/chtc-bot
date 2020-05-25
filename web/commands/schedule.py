@@ -37,7 +37,7 @@ class ScheduleCommandHandler(commands.CommandHandler):
             executor.submit(self.reply, user, args, dayofweek)
             return ":thinking_face: :calendar:"
 
-    def reply(self, user, args: List[str], dayofweek):
+    def reply(self, reply_to: str, args: List[str], dayofweek):
         users_by_status = self.get_users_by_status(args, dayofweek, self.get_soup())
 
         replies = []
@@ -57,7 +57,7 @@ class ScheduleCommandHandler(commands.CommandHandler):
                 replies.append(line)
         reply = "\n".join(replies)
 
-        slack.post_message(channel=user, text=reply)
+        slack.post_message(channel=reply_to, text=reply)
 
     def get_soup(self):
         username = "condor-team"
