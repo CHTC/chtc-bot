@@ -32,11 +32,7 @@ class ScheduleCommandHandler(commands.CommandHandler):
         tz = datetime.timezone(-datetime.timedelta(hours=5))
         dayofweek = datetime.datetime.now(tz=tz).weekday()
         if dayofweek >= 5:
-            slack.post_message(channel=user, text="It's not a weekday.")
-            # FIXME: for testing.
-            dayofweek = 4
-            executor.submit(self.reply, user, args, dayofweek)
-            return ":thinking_face: :calendar:"
+            return ":confused: :calendar: It's not a weekday, there's no schedule."
         else:
             executor.submit(self.reply, user, args, dayofweek)
             return ":thinking_face: :calendar:"
