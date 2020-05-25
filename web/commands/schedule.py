@@ -54,8 +54,11 @@ class ScheduleCommandHandler(commands.CommandHandler):
             else:
                 line = f"{count} people are {formatting.bold(status)}: "
                 for user, link, hours in users:
-                    line = f"{line}<{link}|{user}>, "
-                replies.append(line[:-2])
+                    if user == users[-1][0]:
+                        line = f"{line}and <{link}|user>."
+                    else:
+                        line = f"{line}<{link}|{user}>, "
+                replies.append(line)
         reply = "\n".join(replies)
 
         # FIXME: Why does channel=user work in handle() but not here?
