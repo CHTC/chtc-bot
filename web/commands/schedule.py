@@ -37,7 +37,7 @@ class ScheduleCommandHandler(commands.CommandHandler):
             executor.submit(self.reply, user, args, dayofweek)
             return ":thinking_face: :calendar:"
 
-    def reply(self, user: str, args: List[str], dayofweek):
+    def reply(self, user, args: List[str], dayofweek):
         users_by_status = self.get_users_by_status(args, dayofweek, self.get_soup())
 
         replies = []
@@ -51,14 +51,13 @@ class ScheduleCommandHandler(commands.CommandHandler):
                 line = f"{count} people are {formatting.bold(status)}: "
                 for user, link, hours in users:
                     if user == users[-1][0]:
-                        line = f"{line}and <{link}|user>."
+                        line = f"{line}and <{link}|{user}>."
                     else:
                         line = f"{line}<{link}|{user}>, "
                 replies.append(line)
         reply = "\n".join(replies)
 
-        # FIXME: Why does channel=user work in handle() but not here?
-        slack.post_message(channel="#chtcbot-dev", text=reply)
+        slack.post_message(channel=user, text=reply)
 
     def get_soup(self):
         username = "condor-team"
