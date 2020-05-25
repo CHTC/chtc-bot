@@ -29,7 +29,8 @@ class ScheduleCommandHandler(commands.CommandHandler):
             else [arg.strip() for arg in html.unescape(raw_args).split(",")]
         )
 
-        dayofweek = datetime.datetime.today().weekday()
+        tz = datetime.timezone(-datetime.timedelta(hours=5))
+        dayofweek = datetime.datetime.now(tz=tz).weekday()
         if dayofweek >= 5:
             slack.post_message(channel=user, text="It's not a weekday.")
             # FIXME: for testing.
