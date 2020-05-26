@@ -24,6 +24,12 @@ ad (if not empty) and the result(s) to the channel.
 
 The bot will look up the submit command(s) and echo them to the channel.
 
+`/schedule [USER NAME, USER USER NAME, ...]`
+
+On weekdays, the bot will send you a direct message with the day's schedule
+status for the specified user(s), or all of them, if none are specified.  Use
+the names displayed by the latter to discover the valid arguments to the
+former.
 
 ## Development
 
