@@ -20,6 +20,11 @@ class ScheduleCommandHandler(commands.CommandHandler):
             "https://research.cs.wisc.edu/htcondor/developers/schedules/schedules.pl"
         )
 
+    # This must be a function for testability.  Do not refactor.
+    def get_dayofweek(self):
+        tz = datetime.timezone(-datetime.timedelta(hours=5))
+        return datetime.datetime.now(tz=tz).weekday()
+
     def handle(self):
         user = request.form.get("user_id")
         raw_args = request.form.get("text")
@@ -29,8 +34,7 @@ class ScheduleCommandHandler(commands.CommandHandler):
             else [arg.strip() for arg in html.unescape(raw_args).split(",")]
         )
 
-        tz = datetime.timezone(-datetime.timedelta(hours=5))
-        dayofweek = datetime.datetime.now(tz=tz).weekday()
+        dayofweek = self.get_dayofweek()
         if dayofweek >= 5:
             return ":confused: :calendar: It's not a weekday, there's no schedule."
         else:
