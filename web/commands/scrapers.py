@@ -1,17 +1,16 @@
-from typing import List
-
+import abc
+import html
 import os
 import re
-import html
-import abc
+from typing import List
 
-from flask import current_app, request
 import bs4
+from flask import current_app, request
 
-from . import commands
+from .. import formatting, http, slack, utils
 from ..executor import executor
 from ..utils import ForgetfulDict
-from .. import http, slack, formatting, utils
+from . import commands
 
 
 def hard_shorten(text, limit):
@@ -133,9 +132,7 @@ class KnobsCommandHandler(WebScrapingCommandHandler):
             text_description = format_lists_and_paragraphs(description)
             return f"{formatting.bold(arg)}\n>{text_description}", anchor
         except Exception as e:
-            current_app.logger.exception(
-                f"Error while trying to find {self.word} {arg}: {e}"
-            )
+            current_app.logger.exception(f"Error while trying to find {self.word} {arg}: {e}")
             return None
 
 
@@ -150,9 +147,7 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
     def get_description(self, page_soup: bs4.BeautifulSoup, arg: str):
         try:
             # This can't be the efficient way to do this.
-            spans = page_soup.select(
-                "dt > code.docutils.literal.notranslate > span.pre"
-            )
+            spans = page_soup.select("dt > code.docutils.literal.notranslate > span.pre")
 
             for span in spans:
                 if span.text.lower() == arg.lower():
@@ -173,9 +168,7 @@ class JobAdsCommandHandler(WebScrapingCommandHandler):
                     return f"{formatting.bold(span.text)}\n>{text_description}", anchor
             return None
         except Exception as e:
-            current_app.logger.exception(
-                f"Error while trying to find {self.word} {arg}: {e}"
-            )
+            current_app.logger.exception(f"Error while trying to find {self.word} {arg}: {e}")
             return None
 
 
@@ -321,7 +314,5 @@ class SubmitsCommandHandler(WebScrapingCommandHandler):
                 return ("\n".join(descriptions), anchor)
 
         except Exception as e:
-            current_app.logger.exception(
-                f"Error while trying to find {self.word} {arg}: {e}"
-            )
+            current_app.logger.exception(f"Error while trying to find {self.word} {arg}: {e}")
             return None

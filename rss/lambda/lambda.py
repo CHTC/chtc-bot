@@ -1,8 +1,10 @@
+import json
 import os
 import sys
 import time
-import json
-import botocore, boto3
+
+import boto3
+import botocore
 
 # This is stupid, but you can't explicitly import module dependencies.
 sys.path.append("./libs")
@@ -13,9 +15,7 @@ import requests
 
 def get_dynamo_db_table_from_environment():
     return boto3.resource(
-        "dynamodb",
-        region_name=os.environ["dynamo_region"],
-        config=botocore.client.Config(),
+        "dynamodb", region_name=os.environ["dynamo_region"], config=botocore.client.Config(),
     ).Table(os.environ["dynamo_table"])
 
 
@@ -50,9 +50,7 @@ def handler(event, context):
     last_update_seen = float(state["last_update_seen"])
     rss_shared_secret = state["rss_shared_secret"]
 
-    d = feedparser.parse(
-        "https://htcondor-wiki.cs.wisc.edu/index.cgi/timeline.rss?d=90"
-    )
+    d = feedparser.parse("https://htcondor-wiki.cs.wisc.edu/index.cgi/timeline.rss?d=90")
     last_update = time.mktime(d.feed.updated_parsed)
 
     if last_update_seen < last_update:
@@ -65,10 +63,7 @@ def handler(event, context):
 
         requests.post(
             os.environ["bot_rss_api_endpoint"],
-            headers={
-                "Content-Type": "application/json",
-                "X-Shared-Secret": rss_shared_secret,
-            },
+            headers={"Content-Type": "application/json", "X-Shared-Secret": rss_shared_secret,},
             json=newEntries,
         )
 

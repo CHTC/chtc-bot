@@ -1,12 +1,11 @@
-from typing import List, MutableMapping
-
-import time
 import re
+import time
+from typing import List, MutableMapping
 
 import bs4
 
+from .. import formatting, http, slack
 from .handlers import RegexMessageHandler
-from .. import http, slack, formatting
 
 
 class TicketLinker(RegexMessageHandler):
@@ -25,9 +24,7 @@ class TicketLinker(RegexMessageHandler):
         now = time.monotonic()
         self._recently_linked_cleanup(now)
         return [
-            match
-            for match in matches
-            if not self.recently_linked(message["channel"], match, now)
+            match for match in matches if not self.recently_linked(message["channel"], match, now)
         ]
 
     def recently_linked(self, channel: str, ticket_id: str, now: float):

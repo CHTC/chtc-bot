@@ -1,8 +1,7 @@
-import pytest
+import os
 
 import bs4
-
-import os
+import pytest
 
 from web import formatting
 
@@ -33,10 +32,10 @@ def test_link(input, text, expected):
     assert formatting.link(input, text) == expected
 
 
-ATTRS_URL = "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
-KNOBS_URL = (
-    "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
+ATTRS_URL = (
+    "https://htcondor.readthedocs.io/en/latest/classad-attributes/job-classad-attributes.html"
 )
+KNOBS_URL = "https://htcondor.readthedocs.io/en/latest/admin-manual/configuration-macros.html"
 
 
 @pytest.mark.parametrize(

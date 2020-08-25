@@ -2,10 +2,10 @@ from pprint import pformat
 
 from flask import request
 
-from . import commands
+from .. import formatting, slack
 from ..executor import executor
 from ..model import SlackUser
-from .. import slack, formatting
+from . import commands
 
 
 class UserCommandHandler(commands.CommandHandler):

@@ -2,9 +2,8 @@ import traceback
 
 from flask import current_app
 
-from ..executor import executor
 from .. import slack
-
+from ..executor import executor
 
 EVENT_HANDLERS = []
 

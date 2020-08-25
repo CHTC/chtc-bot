@@ -1,19 +1,8 @@
-from typing import (
-    Union,
-    Mapping,
-    TypeVar,
-    Optional,
-    Callable,
-    Tuple,
-    Dict,
-    List,
-)
-from collections.abc import MutableMapping
-
-import multiprocessing
-
-import time
 import datetime
+import multiprocessing
+import time
+from collections.abc import MutableMapping
+from typing import Callable, Dict, List, Mapping, Optional, Tuple, TypeVar, Union
 
 
 class LockableMixin:
@@ -156,9 +145,7 @@ def partition_collection(
         try:
             goodbad[key(v)].append(v)
         except KeyError as e:
-            raise ValueError(
-                "The partition key function must return a bool (True or False)"
-            ) from e
+            raise ValueError("The partition key function must return a bool (True or False)") from e
 
     return goodbad[True], goodbad[False]
 
@@ -193,8 +180,6 @@ def partition_mapping(
         try:
             goodbad[key(v)][k] = v
         except KeyError as e:
-            raise ValueError(
-                "The partition key function must return a bool (True or False)"
-            ) from e
+            raise ValueError("The partition key function must return a bool (True or False)") from e
 
     return goodbad[True], goodbad[False]

@@ -1,9 +1,8 @@
-import pytest
-
-import time
 import textwrap
+import time
 
 import bs4
+import pytest
 
 from web.commands import scrapers
 
@@ -14,10 +13,7 @@ def kch():
 
 
 def test_get_description_returns_none_if_it_fails_to_find_the_knob(kch):
-    assert (
-        kch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
-        is None
-    )
+    assert kch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo") is None
 
 
 # This is a big blob of sample text taken from the HTCondor manual HTML.
@@ -81,11 +77,7 @@ KNOB_SOUP = bs4.BeautifulSoup(KNOB_HTML, "html.parser")
 )
 def test_get_knob_description(kch, knob, expected, anchor):
     # clean up the triple-quoted string
-    expected = (
-        (textwrap.dedent(expected).strip(), anchor)
-        if expected is not None
-        else expected
-    )
+    expected = (textwrap.dedent(expected).strip(), anchor) if expected is not None else expected
 
     assert kch.get_description(KNOB_SOUP, knob) == expected
 
@@ -99,8 +91,7 @@ def test_handle_knobs_end_to_end(mocker, client, memory, channel_id):
     mock = mocker.patch("web.slack.post_message")
 
     client.post(
-        "/slash/knobs",
-        data=dict(channel_id=channel_id, user_id="5678", text="CKPT_PROBE"),
+        "/slash/knobs", data=dict(channel_id=channel_id, user_id="5678", text="CKPT_PROBE"),
     )
 
     # let the executor run

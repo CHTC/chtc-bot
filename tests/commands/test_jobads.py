@@ -1,9 +1,8 @@
-import pytest
-
-import time
 import textwrap
+import time
 
 import bs4
+import pytest
 
 from web.commands import scrapers
 
@@ -14,10 +13,7 @@ def jch():
 
 
 def test_get_description_returns_none_if_it_fails_to_find_the_attr(jch):
-    assert (
-        jch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo")
-        is None
-    )
+    assert jch.get_description(bs4.BeautifulSoup("", features="html.parser"), "foo") is None
 
 
 # This is a big blob of sample text taken from the HTCondor manual HTML.
@@ -78,11 +74,7 @@ ATTRS_SOUP = bs4.BeautifulSoup(ATTRS_HTML, "html.parser")
 )
 def test_get_description(jch, attr, expected, anchor):
     # clean up the triple-quoted string
-    expected = (
-        (textwrap.dedent(expected).strip(), anchor)
-        if expected is not None
-        else expected
-    )
+    expected = (textwrap.dedent(expected).strip(), anchor) if expected is not None else expected
 
     assert jch.get_description(ATTRS_SOUP, attr) == expected
 
@@ -96,8 +88,7 @@ def test_handle_jobads_end_to_end(mocker, client, memory, channel_id):
     mock = mocker.patch("web.slack.post_message")
 
     client.post(
-        "/slash/jobads",
-        data=dict(channel_id=channel_id, user_id="5678", text="AcctGroupUser"),
+        "/slash/jobads", data=dict(channel_id=channel_id, user_id="5678", text="AcctGroupUser"),
     )
 
     # let the executor run

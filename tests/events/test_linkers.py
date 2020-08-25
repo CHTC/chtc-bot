@@ -1,6 +1,6 @@
-import pytest
-
 import re
+
+import pytest
 
 from web.events import linkers
 

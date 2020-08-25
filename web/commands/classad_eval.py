@@ -1,17 +1,14 @@
-from typing import Tuple, List, Collection, Mapping, Any, Union
-
-import textwrap
 import html
 import shlex
+import textwrap
+from typing import Any, Collection, List, Mapping, Tuple, Union
 
+import classad
+import htcondor
 from flask import current_app, request
 
-import htcondor
-import classad
-
+from .. import formatting, slack
 from ..executor import executor
-from .. import slack, formatting
-
 from . import commands
 
 
@@ -36,9 +33,7 @@ def generate_classad_eval_reply(user: str, text: str):
     try:
         ads_and_exprs = parse(text)
     except Exception as e:
-        current_app.logger.exception(
-            f"Failed to parse ad or expressions (raw: {text}): {e}"
-        )
+        current_app.logger.exception(f"Failed to parse ad or expressions (raw: {text}): {e}")
         return html.escape(f"Failed to parse ad or expressions: {e}", quote=False)
 
     try:
@@ -87,9 +82,7 @@ def generate_classad_eval_reply(user: str, text: str):
 
 def format_result(result: str):
     """Collapse newlines into spaces."""
-    return html.escape(
-        " ".join(s.strip() for s in str(result).splitlines()), quote=False
-    )
+    return html.escape(" ".join(s.strip() for s in str(result).splitlines()), quote=False)
 
 
 def parse(text: str) -> List[Union[classad.ClassAd, classad.ExprTree]]:
@@ -111,9 +104,7 @@ def _try_parse_ad(text: str) -> classad.ClassAd:
         return classad.ClassAd(f"[{text}]")
 
 
-def evaluate(
-    ads_and_exprs,
-) -> List[Union[classad.ClassAd, Tuple[classad.ExprTree, Any]]]:
+def evaluate(ads_and_exprs,) -> List[Union[classad.ClassAd, Tuple[classad.ExprTree, Any]]]:
     results = []
     base_ad = classad.ClassAd()
     for ad_or_expr in ads_and_exprs:

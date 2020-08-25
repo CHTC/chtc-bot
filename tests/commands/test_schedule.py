@@ -1,9 +1,9 @@
-import pytest
-
-import bs4
-import time
 import datetime
 import textwrap
+import time
+
+import bs4
+import pytest
 
 from web.commands import schedule
 

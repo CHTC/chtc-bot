@@ -1,24 +1,20 @@
+import datetime
+import html
 from typing import List
 
-from flask import request
-from flask import current_app
-
 import bs4
-import html
-import datetime
+from flask import current_app, request
 
-from . import commands
+from .. import formatting, http, slack
 from ..executor import executor
-from .. import slack, formatting, http
+from . import commands
 
 
 # Although this command does scrape the web, since it replies privately,
 # we don't want to include the ForgetfulDict anti-spam protections.
 class ScheduleCommandHandler(commands.CommandHandler):
     def __init__(self):
-        self.url = (
-            "https://research.cs.wisc.edu/htcondor/developers/schedules/schedules.pl"
-        )
+        self.url = "https://research.cs.wisc.edu/htcondor/developers/schedules/schedules.pl"
 
     # This must be a function for testability.  Do not refactor.
     def get_dayofweek(self):
@@ -100,9 +96,7 @@ class ScheduleCommandHandler(commands.CommandHandler):
             fields = td.text.split("\n")
             status = fields[0]
             hours = fields[1] if len(fields) > 1 and len(fields[1]) > 0 else None
-            status = (
-                phrasing.get(status) if phrasing.get(status) is not None else status
-            )
+            status = phrasing.get(status) if phrasing.get(status) is not None else status
 
             if users_by_status.get(status) is None:
                 users_by_status[status] = []

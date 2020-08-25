@@ -1,9 +1,9 @@
+import datetime
 import os
 import re
-import datetime
 
-import web.events as events
 import web.commands as commands
+import web.events as events
 from web import rss
 
 DEBUG = False

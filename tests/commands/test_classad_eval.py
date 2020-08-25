@@ -1,11 +1,9 @@
 import itertools
-
-import pytest
-
 import time
 
-import htcondor
 import classad
+import htcondor
+import pytest
 
 from web.commands import classad_eval
 
@@ -13,17 +11,10 @@ from web.commands import classad_eval
 @pytest.mark.parametrize(
     "text, expected",
     [
-        (
-            "'[ foo = 5 ]' 'foo'",
-            [classad.ClassAd({"foo": 5}), classad.ExprTree("foo")],
-        ),
+        ("'[ foo = 5 ]' 'foo'", [classad.ClassAd({"foo": 5}), classad.ExprTree("foo")],),
         (
             "'[ foo = \"bar\" ]' 'foo' 'bar'",
-            [
-                classad.ClassAd({"foo": "bar"}),
-                classad.ExprTree("foo"),
-                classad.ExprTree("bar"),
-            ],
+            [classad.ClassAd({"foo": "bar"}), classad.ExprTree("foo"), classad.ExprTree("bar"),],
         ),
         (
             "'[ foo = bar ]' 'foo' 'bar'",
@@ -35,10 +26,7 @@ from web.commands import classad_eval
         ),
         ("'[]' '1 + 1'", [classad.ClassAd(), classad.ExprTree("1 + 1")]),
         ("'' '1 + 1'", [classad.ClassAd(), classad.ExprTree("1 + 1")]),
-        (
-            "'foo = 1' 'foo + 1'",
-            [classad.ClassAd({"foo": 1}), classad.ExprTree("foo + 1")],
-        ),
+        ("'foo = 1' 'foo + 1'", [classad.ClassAd({"foo": 1}), classad.ExprTree("foo + 1")],),
         (
             "'foo = 1; bar = 2' 'foo + 1'",
             [classad.ClassAd({"foo": 1, "bar": 2}), classad.ExprTree("foo + 1")],
@@ -49,11 +37,7 @@ from web.commands import classad_eval
         ),
         (
             "'a = 1' 'b = 2' 'a > b'",
-            [
-                classad.ClassAd({"a": 1}),
-                classad.ClassAd({"b": 2}),
-                classad.ExprTree("a > b"),
-            ],
+            [classad.ClassAd({"a": 1}), classad.ClassAd({"b": 2}), classad.ExprTree("a > b"),],
         ),
         ("'[ a = 5; ]' 'a'", [classad.ClassAd({"a": 5}), classad.ExprTree("a")]),
         ("'[ a = 5; ]' a", [classad.ClassAd({"a": 5}), classad.ExprTree("a")]),
