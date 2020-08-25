@@ -11,7 +11,7 @@ jobs:
     - name: Build and push Docker image
       uses: docker/build-push-action@v1
       with:
-        dockerfile: docker/Dockerfile
+        dockerfile: docker/web/Dockerfile
         tag_with_ref: true
         tag_with_sha: true
         always_pull: true
