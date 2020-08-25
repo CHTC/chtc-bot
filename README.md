@@ -39,3 +39,12 @@ to install the development packages.
 This repository uses `pre-commit`.
 After installing development dependencies, run `pre-commit install`.
 **Do not commit before installing `pre-commit`!**
+
+## Expected Environment Variables
+
+- `CONFIG`
+- `SLACK_BOT_TOKEN`
+- `SLACK_SIGNING_SECRET`
+- `RSS_SHARED_SECRET`
+- `SCHEDULE_COMMAND_PASSWORD`
+- `DATABASE_URL`
