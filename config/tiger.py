@@ -6,8 +6,6 @@ from config.base import *
 
 PRODUCTION = True
 
-SERVER_NAME = "0.0.0.0:5000"
-
 # Database configuration
 SQLALCHEMY_DATABASE_URI = None
 SQLALCHEMY_RECORD_QUERIES = False
