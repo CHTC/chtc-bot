@@ -6,4 +6,4 @@ COPY . /app/
 RUN python -m pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
-CMD ["python", "wsgi.py", "-h", "0.0.0.0", "-p", "5000"]
+CMD ["python", "wsgi.py"]
