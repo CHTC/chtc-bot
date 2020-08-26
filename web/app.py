@@ -18,8 +18,10 @@ def create_app(config):
         from .model import db, migrate
 
         executor.init_app(app)
-        db.init_app(app)
-        migrate.init_app(app, db)
+
+        if app.config.get("SQLALCHEMY_DATABASE_URI") is not None:
+            db.init_app(app)
+            migrate.init_app(app, db)
 
         # hook up the low-level raw event handlers; high-level config is done in base.py
         if app.config.get("SLACK_SIGNING_SECRET") is not None:
@@ -45,5 +47,9 @@ def create_app(config):
         # actively working on this again.
         for url, methods, api, api_handler in app.config["APIS"]:
             app.add_url_rule(url, methods=methods, endpoint=api, view_func=api_handler.handle)
+
+        @app.route("/health")
+        def health():
+            return "hi!"
 
         return app
