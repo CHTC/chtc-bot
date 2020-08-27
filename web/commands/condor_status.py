@@ -32,7 +32,7 @@ def generate_condor_status_reply(user: str, text: str):
     fmt_args = formatting.fixed(shlex.join(args))
     current_app.logger.debug(f"About to run: {fmt_args}")
 
-    cmd = subprocess.run(args, text=True, env={})
+    cmd = subprocess.run(args, text=True, env={}, capture_output=True)
 
     if cmd.returncode != 0:
         current_app.logger.error(f"Error while trying to run {shlex.join(args)}:\n{cmd.stderr}")
