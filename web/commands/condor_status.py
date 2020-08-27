@@ -36,6 +36,6 @@ def generate_condor_status_reply(user: str, text: str):
 
     if cmd.returncode != 0:
         current_app.logger.error(f"Error while trying to run {shlex.join(args)}:\n{cmd.stderr}")
-        return f"Error while trying to run {fmt_args} for {user}:\n{formatting.fixed_block(cmd.stderr)}"
+        return f"Error while trying to run {fmt_args} for {user}: {formatting.fixed(cmd.stderr.splitlines()[0])}"
 
-    return f"{user} asked me to run {fmt_args}:\n{formatting.fixed_block(cmd.stdout)}"
+    return f"<@{user}> asked me to run {fmt_args}:\n{formatting.fixed_block(cmd.stdout.rstrip())}"
