@@ -27,7 +27,7 @@ def condor_status_reply(channel: str, user: str, text: str):
 
 
 def generate_condor_status_reply(user: str, text: str):
-    args = ["condor_status", "-pool", current_app.config.POOL, *shlex.split(text)]
+    args = ["condor_status", "-pool", current_app.config["POOL"], *shlex.split(text)]
 
     fmt_args = formatting.fixed(shlex.join(args))
     current_app.logger.debug(f"About to run: {fmt_args}")
