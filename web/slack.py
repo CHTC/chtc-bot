@@ -15,6 +15,14 @@ def post_message(*args, **kwargs):
     return client().chat_postMessage(*args, **kwargs)
 
 
+def upload_file(*args, **kwargs):
+    return client().files_upload(*args, **kwargs)
+
+
+def delete_file(*args, **kwargs):
+    return client().files_delete(*args, **kwargs)
+
+
 def user_info(*args, **kwargs):
     """
     Get info on a user.

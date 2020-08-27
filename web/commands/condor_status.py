@@ -1,6 +1,8 @@
+import datetime
 import html
 import shlex
 import subprocess
+import time
 
 from flask import current_app, request
 
@@ -21,9 +23,22 @@ class CondorStatusCommandHandler(commands.CommandHandler):
 
 
 def condor_status_reply(channel: str, user: str, text: str):
-    msg = generate_condor_status_reply(user, text)
+    msg, file = generate_condor_status_reply(user, text)
 
-    slack.post_message(text=msg, channel=channel)
+    info = slack.upload_file(
+        initial_comment=msg,
+        content=file,
+        filetype="text",
+        channels=channel,
+        title="condor_status at {}".format(datetime.datetime.utcnow()),
+    )
+
+    executor.submit(delete_file, info["file"]["id"])
+
+
+def delete_file(file_id: str, delay=datetime.timedelta(hours=6).total_seconds()):
+    time.sleep(delay)
+    slack.delete_file(file=file_id)
 
 
 def generate_condor_status_reply(user: str, text: str):
@@ -38,4 +53,4 @@ def generate_condor_status_reply(user: str, text: str):
         current_app.logger.error(f"Error while trying to run {shlex.join(args)}:\n{cmd.stderr}")
         return f"Error while trying to run {fmt_args} for {user}: {formatting.fixed(cmd.stderr.splitlines()[0])}"
 
-    return f"<@{user}> asked me to run {fmt_args}:\n{formatting.fixed_block(cmd.stdout.rstrip())}"
+    return f"<@{user}> asked me to run {fmt_args}:", cmd.stdout.rstrip()
