@@ -2,7 +2,6 @@ import datetime
 import html
 import shlex
 import subprocess
-import time
 
 from flask import current_app, request
 
@@ -25,7 +24,7 @@ class CondorStatusCommandHandler(commands.CommandHandler):
 def condor_status_reply(channel: str, user: str, text: str):
     msg, file = generate_condor_status_reply(user, text)
 
-    info = slack.upload_file(
+    slack.upload_file(
         initial_comment=msg,
         content=file,
         filetype="text",
@@ -33,12 +32,7 @@ def condor_status_reply(channel: str, user: str, text: str):
         title="condor_status at {}".format(datetime.datetime.utcnow()),
     )
 
-    executor.submit(delete_file, info["file"]["id"])
-
-
-def delete_file(file_id: str, delay=datetime.timedelta(hours=6).total_seconds()):
-    time.sleep(delay)
-    slack.delete_file(file=file_id)
+    executor.submit(slack.delete_uploaded_files)
 
 
 def generate_condor_status_reply(user: str, text: str):
