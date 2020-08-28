@@ -54,14 +54,16 @@ def delete_uploaded_files(delay=datetime.timedelta(hours=6).total_seconds()):
     time this function is run.
     """
     # make sure this gets run in a thread outside the thread pool
-    threading.Thread(target=_delete_uploaded_files, args=(delay,)).start()
+    threading.Thread(
+        target=_delete_uploaded_files, args=(delay, current_app.config["BOT_USER_ID"])
+    ).start()
 
 
-def _delete_uploaded_files(delay):
+def _delete_uploaded_files(delay, bot_user_id):
     start = time.time()
 
     time.sleep(delay)
 
-    for file in list_files(user=current_app.config["BOT_USER_ID"])["files"]:
+    for file in list_files(user=bot_user_id)["files"]:
         if start >= file["created"]:
             delete_file(file=file["id"])
