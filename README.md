@@ -54,7 +54,7 @@ CHTC-Bot is currently deployed on the CHTC Kubernetes cluster.
 Every commit to the repository generates a SHA-tagged Docker image via the
 `.github/workflows/docker-build.yml` workflow.
 To deploy a new version of the bot, follow the instructions in the configuration
-repository to update the image version specified in the Kubernetes deployment 
+repository to update the image version specified in the Kubernetes deployment
 configuration.
 
 ### Expected Environment Variables
