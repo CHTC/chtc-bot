@@ -1,11 +1,12 @@
 # chtc-bot
 
-## New Syntax
+## Events
+
 Saying `gt#1000` will cause the CHTC bot to reply with a link to the corresponding GitTrac ticket.
 
 Saying `rt#1001` will cause the CHTC bot to reply with a link to the corresponding RT ticket.
 
-## New Commands
+## Commands
 
 `/knobs KNOB [KNOB_KNOB ...]`
 
@@ -40,11 +41,31 @@ This repository uses `pre-commit`.
 After installing development dependencies, run `pre-commit install`.
 **Do not commit before installing `pre-commit`!**
 
-## Expected Environment Variables
+To run the tests, run `pytest` from the repository root.
 
-- `CONFIG`
+## Deployment
+
+CHTC-Bot is currently deployed on the CHTC Kubernetes cluster.
+
+> There are also some files lying around from the now-deprecated Heroku deployment.
+
+### Updating Version
+
+Every commit to the repository generates a SHA-tagged Docker image via the
+`.github/workflows/docker-build.yml` workflow.
+To deploy a new version of the bot, follow the instructions in the configuration
+repository to update the image version specified in the Kubernetes deployment 
+configuration.
+
+### Expected Environment Variables
+
+- `CONFIG` - The name of the configuration file in `config/` to load.
 - `SLACK_BOT_TOKEN`
 - `SLACK_SIGNING_SECRET`
 - `RSS_SHARED_SECRET`
 - `SCHEDULE_COMMAND_PASSWORD`
-- `DATABASE_URL`
+- `DATABASE_URL` - Optional; database features will not be loaded if not present.
+
+Some of these environment variables are secret, like the `SLACK_BOT_TOKEN`.
+Use the "sealed secrets" described in the configuration repository to store
+those secrets safely.
