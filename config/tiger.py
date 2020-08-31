@@ -21,3 +21,5 @@ RSS_SHARED_SECRET = os.environ["RSS_SHARED_SECRET"]
 
 # schedule command credentials
 SCHEDULE_COMMAND_PASSWORD = os.environ["SCHEDULE_COMMAND_PASSWORD"]
+
+POOL = "cm.chtc.wisc.edu"

@@ -52,6 +52,7 @@ SLASH_COMMANDS = {
     "classad_eval": commands.ClassadEvalCommandHandler(),
     "user": commands.UserCommandHandler(),
     "schedule": commands.ScheduleCommandHandler(),
+    "condor_status": commands.CondorStatusCommandHandler(),
 }
 
 
