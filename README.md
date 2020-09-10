@@ -32,6 +32,10 @@ status for the specified user(s), or all of them, if none are specified.  Use
 the names displayed by the latter to discover the valid arguments to the
 former.
 
+`/condor_status [condor_status_args]`
+
+Runs condor_status against (by default) the CHTC pool.  Use sparingly.
+
 ## Development
 
 Once you've cloned the repository, run `pip install -r requirements-dev.txt`
