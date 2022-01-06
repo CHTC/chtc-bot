@@ -5,7 +5,7 @@ psycopg2==2.8.6
 flask-migrate==2.7.0
 slackclient==2.9.3
 slackeventsapi==2.2.1
-requests==2.25.1
+requests==2.27.1
 beautifulsoup4==4.9.3
 gunicorn==20.1.0
 htcondor==8.9.11
