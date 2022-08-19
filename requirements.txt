@@ -1,5 +1,5 @@
 flask==1.1.2
-flask-executor==0.9.4
+flask-executor==1.0.0
 flask-sqlalchemy==2.5.1
 psycopg2==2.8.6
 flask-migrate==2.7.0
