@@ -2,7 +2,7 @@ flask==1.1.2
 flask-executor==0.9.4
 flask-sqlalchemy==2.5.1
 psycopg2==2.8.6
-flask-migrate==2.7.0
+flask-migrate==4.0.2
 slackclient==2.9.3
 slackeventsapi==2.2.1
 requests==2.25.1
